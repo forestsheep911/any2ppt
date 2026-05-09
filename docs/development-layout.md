@@ -6,6 +6,7 @@ This repository separates product artifacts, plugin source, development tools, a
 
 ```text
 any2ppt/
+├── .agents/plugins/       # Local marketplace metadata for plugin install testing
 ├── docs/                  # Vision, architecture, and development notes
 ├── plugins/               # Codex plugin source directories
 │   └── any2ppt/           # Source of the Any2PPT plugin
@@ -28,6 +29,24 @@ Keep files here limited to plugin runtime contents:
 - Future plugin files such as `.mcp.json` or `.app.json`
 
 Do not store local experiments, raw media, generated prompt packs, or release zip files inside the plugin source.
+
+## Local Marketplace
+
+`.agents/plugins/marketplace.json` is the repo-local plugin marketplace used for install-flow testing.
+
+It points to the source plugin with:
+
+```json
+{
+  "name": "any2ppt",
+  "source": {
+    "source": "local",
+    "path": "./plugins/any2ppt"
+  }
+}
+```
+
+Use this marketplace to test the future workflow where Any2PPT is discovered, installed, and then used from another working directory. Keep marketplace paths relative to the repository root.
 
 ## Development Tools
 

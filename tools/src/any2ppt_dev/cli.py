@@ -12,6 +12,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PLUGIN = REPO_ROOT / "plugins" / "any2ppt"
 DEFAULT_RUNS_DIR = REPO_ROOT / "local-runs"
+DEFAULT_MARKETPLACE = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 TEXT_SOURCE_SUFFIXES = {".md", ".markdown", ".txt"}
 
 
@@ -46,6 +47,32 @@ def inspect_plugin(plugin: Path) -> int:
         if not name or not description:
             raise ValueError(f"{skill_md} must include name and description")
         print(f"- {name}: {skill_md.parent.relative_to(plugin)}")
+
+    return 0
+
+
+def inspect_marketplace(marketplace: Path) -> int:
+    marketplace = marketplace.resolve()
+    data = json.loads(marketplace.read_text(encoding="utf-8"))
+    plugins = data.get("plugins")
+    if not isinstance(plugins, list):
+        raise ValueError(f"{marketplace} must contain a plugins list")
+
+    print(f"marketplace: {data.get('name')}")
+    print(f"plugins: {len(plugins)}")
+
+    root = marketplace.parents[2]
+    for plugin in plugins:
+        name = plugin.get("name")
+        source = plugin.get("source", {})
+        path_value = source.get("path")
+        if not name or not path_value:
+            raise ValueError(f"marketplace plugin entry is missing name or source.path: {plugin}")
+        plugin_path = (root / path_value).resolve()
+        manifest_path = plugin_path / ".codex-plugin" / "plugin.json"
+        if not manifest_path.is_file():
+            raise FileNotFoundError(f"plugin manifest not found for {name}: {manifest_path}")
+        print(f"- {name}: {plugin_path.relative_to(root)}")
 
     return 0
 
@@ -121,6 +148,9 @@ def main() -> int:
     inspect_parser = subparsers.add_parser("inspect", help="Inspect the plugin manifest and skills")
     inspect_parser.add_argument("--plugin", type=Path, default=DEFAULT_PLUGIN)
 
+    marketplace_parser = subparsers.add_parser("inspect-marketplace", help="Inspect repo-local plugin marketplace")
+    marketplace_parser.add_argument("--marketplace", type=Path, default=DEFAULT_MARKETPLACE)
+
     new_run_parser = subparsers.add_parser("new-run", help="Create a standard local run directory from a text source")
     new_run_parser.add_argument("--source", type=Path, required=True, help="Markdown or plain text source file")
     new_run_parser.add_argument("--name", help="Run name. Defaults to the source filename stem.")
@@ -131,6 +161,8 @@ def main() -> int:
 
     if args.command == "inspect":
         return inspect_plugin(args.plugin.resolve())
+    if args.command == "inspect-marketplace":
+        return inspect_marketplace(args.marketplace)
     if args.command == "new-run":
         return new_run(args.source, args.name, args.runs_dir, args.force)
 
