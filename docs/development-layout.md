@@ -30,6 +30,24 @@ Keep files here limited to plugin runtime contents:
 
 Do not store local experiments, raw media, generated prompt packs, or release zip files inside the plugin source.
 
+## Sample Decks
+
+`plugins/any2ppt/assets/sample-decks/<deck-name>/` holds slim, in-tree teaching examples that specialist skills can reference. A sample deck typically contains:
+
+- `brief.md`: the slim deck brief (no raw transcript or external content).
+- `storyboard.md`: the per-slide plan.
+- `prompts/<slide-id>.md`: a small selection (cover plus 2-3 representative slides), not the full prompt pack.
+- `notes.md`: explanation of why the deck worked and what to reuse or avoid.
+
+Inclusion rules (must hold for every sample deck added here):
+
+- **Slim**: keep total sample size well under 200 KB. Plain text only. Strip raw transcripts, full audio, and full prompt packs; reference them as living in `local-runs/` (gitignored) instead.
+- **Rights-clean**: no third-party photographs, book covers, archive material, or trademarked logos. No identifiable real people in prompts. No copyrighted source content embedded inline.
+- **Teachable**: every sample must include a `notes.md` explaining what worked and what not to copy blindly. A sample without `notes.md` is not yet a sample.
+- **Stable**: sample decks change only when their teaching value changes. Do not chase the latest production output; pick a stable, exemplary version and freeze it.
+
+Skills that reference samples (currently `story-architect` and `visual-director`) link to `../../assets/sample-decks/<deck-name>/` from inside their `SKILL.md`. New samples should be linked from at least one skill, otherwise they will not be discoverable.
+
 ## Local Marketplace
 
 `.agents/plugins/marketplace.json` is the repo-local plugin marketplace used for install-flow testing.

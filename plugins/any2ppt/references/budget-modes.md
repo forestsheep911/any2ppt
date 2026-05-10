@@ -1,5 +1,7 @@
 # Budget Modes
 
+Budget mode is picked **after** production mode (see [workflow.md](workflow.md)). Mode says what kind of artifact the deck becomes; budget says how thoroughly each step is executed. The default when the user is silent is `balanced`.
+
 ## quick
 
 Use for early exploration or when the user values speed.
@@ -11,6 +13,8 @@ Default scope:
 - No image generation.
 - No multi-pass critique.
 
+Target slide count: **5-7**.
+
 ## balanced
 
 Use as the default mode.
@@ -20,8 +24,10 @@ Default scope:
 - Deck brief.
 - Slide storyboard.
 - Visual direction.
-- Per-slide image prompts when requested.
-- Lightweight quality check.
+- Per-slide image prompts when requested (image-first or hybrid mode) or `work/layouts.md` (pptx-native mode).
+- Lightweight quality check via `any2ppt-dev review`.
+
+Target slide count: **7-10**.
 
 ## premium
 
@@ -35,6 +41,10 @@ Default scope:
 - Generated images or PPTX assembly when tools are available.
 - Render or screenshot review.
 - Iteration on weak slides.
+
+Target slide count: **8-14**.
+
+The `any2ppt-dev review` tool warns when the storyboard's slide count is outside the band. Document an exception (e.g. a narrow technical topic that genuinely fits in fewer slides) in the brief's "Skill Notes".
 
 ## Downgrade Choices
 

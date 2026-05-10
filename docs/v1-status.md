@@ -1,0 +1,107 @@
+# Any2PPT V1 Status — v0.2.0
+
+This is the closing report for the six-week V1 validation roadmap defined in [v1-roadmap.md](v1-roadmap.md). It records what shipped, what did not, and what is queued for V2+.
+
+## V1 At a Glance
+
+- Plugin version: **0.2.0** (was 0.1.0 at the start of the roadmap).
+- Specialist skills: **5** (was 4).
+  - `deck-producer`, `story-architect`, `slide-storyboarder`, `visual-director` (V1 originals).
+  - `document-ingestor` (added in Week 5 as the post-W4 route).
+- Production modes recognized by the workflow: `image-first`, `pptx-native`, `hybrid`.
+- Source kinds accepted by `new-run`: text / Markdown, `.pdf`, `http(s)` URL.
+- Quality gate: `any2ppt-dev review --run <name>` writes `dist/review.md` with seven rule families (run.json validity, brief sections, storyboard slide blocks, slide-id format, per-archetype support-point band, archetype-name validation, slide-count band per budget, prompts ↔ storyboard mapping, layouts presence for pptx-native).
+
+### Inspect Output Snapshot
+
+```text
+=== INSPECT ===
+plugin: any2ppt
+version: 0.2.0
+skills: 5
+- deck-producer: skills\deck-producer
+- document-ingestor: skills\document-ingestor
+- slide-storyboarder: skills\slide-storyboarder
+- story-architect: skills\story-architect
+- visual-director: skills\visual-director
+
+=== INSPECT-MARKETPLACE (in-repo) ===
+marketplace: any2ppt-local
+plugins: 1
+- any2ppt: plugins\any2ppt
+
+=== INSPECT-MARKETPLACE (cross-repo) ===
+marketplace: any2ppt-local
+plugins: 1
+- any2ppt: C:\Users\fores\dev\trytry\any2ppt\plugins\any2ppt
+```
+
+## What V1 Ships
+
+### Plugin
+
+- Five specialist `SKILL.md` files with explicit roles, outputs, do-nots, and (where relevant) reference samples.
+- Four references: [workflow](../plugins/any2ppt/references/workflow.md), [budget-modes](../plugins/any2ppt/references/budget-modes.md), [slide-archetypes](../plugins/any2ppt/references/slide-archetypes.md), [critique-checklist](../plugins/any2ppt/references/critique-checklist.md). Terminology is unified across files (e.g. `production_mode` vs `budget_mode` are named consistently).
+- One in-tree teaching sample: `plugins/any2ppt/assets/sample-decks/sanmiao-victory-day/` (image-first), referenced from `story-architect` and `visual-director`.
+
+### Documentation
+
+- [v1-roadmap.md](v1-roadmap.md) — the six-week schedule and per-week deliverables.
+- [v1-smoke-report.md](v1-smoke-report.md) — Week 1 walk-through findings (5 checklist items + minor findings).
+- [install-and-use.md](install-and-use.md) — minimum repeatable steps to install and use the plugin from a fresh working directory; includes findings from the Week 2 install loop.
+- [pptx-native-experiment.md](pptx-native-experiment.md) — Week 4 experiment, cost quantification, and the route-B pivot recommendation.
+- [development-layout.md](development-layout.md) — repo layout, with new "Sample Decks" inclusion rules added in Week 3.
+
+### Dev Tool (`any2ppt-dev`)
+
+Six subcommands:
+
+- `inspect` — verify plugin manifest and skills.
+- `inspect-marketplace` — verify a marketplace JSON; cross-repo paths handled.
+- `new-run` — scaffold a run folder; accepts text / PDF / URL; records `production_mode` and `budget_mode` in `run.json`; auto-routes to the ingestor for PDF / URL.
+- `review` — rule-based check on a run folder; writes `dist/review.md`.
+- `pptx draft` — experimental two-archetype (cover, thesis) pptx-native prototype; not the production assembler.
+- `ingest` — standalone PDF or URL → Markdown ingestion, useful when you want to inspect the extracted source before creating a run.
+
+### Tested Run Loops
+
+- Text source end-to-end: `local-runs/smoke-text-input/` (W1).
+- Cross-repo install + small deck: `C:\Users\fores\dev\trytry\any2ppt-install-test\pin-python-version\` (W2; gitignored).
+- Sanmiao image-first sample: in-tree slim version (W3).
+- PPTX-native experimental draft: `local-runs/smoke-text-input/dist/draft.pptx` (W4).
+- PDF + URL ingest end-to-end: `any2ppt-install-test/ingest-test/{pdf,url}-end-to-end/` with deck-brief produced for both (W5).
+
+## What V1 Did Not Ship (deferred, as planned)
+
+- `pptx-assembler` skill — the W4 experiment proved it would consume the entire remaining budget without theming. Queued for V2 with a defined work order (theme module → master layouts → text-fitting → six remaining archetypes).
+- `style-director` skill — palette / typography / template management, beyond the in-prompt style guidance image-first decks already use.
+- `youtube-ingestor`, `audio-transcriber`, DOCX / PPTX / XLSX ingestion.
+- Local web UI / studio.
+- Editable overlays on top of image-first slides.
+- Multi-pass critique loops (`deck-critic` skill).
+- Automatic image generation calls inside the plugin (image-first runs still expect external generation).
+- LLM-based content checks in `review` (current rules are structural only).
+
+## V2 Candidates, Ranked by Expected Value
+
+The Week 4 decision and Week 5 result reorder the V2 backlog from the original vision:
+
+1. **`pptx-assembler` (with theme + layout system first)** — earned its priority by being the work that V1 deliberately did not do; V2 should front-load the theme/layout foundations rather than chase one-archetype-at-a-time.
+2. **`document-ingestor` v2** — add OCR fallback for image-only PDFs and a JavaScript-rendered URL fetcher (likely Playwright-backed). Both came up as W5 limitations.
+3. **`style-director`** — emerges naturally as a partner to `pptx-assembler`. Image-first decks would benefit too.
+4. **`youtube-ingestor`** — high user value but requires audio pipeline + transcription; treat as a separate vertical.
+5. **`deck-critic`** — turn the structural `review` rules into LLM-based judgment passes. Cheap to start once the LLM-call boundary is defined.
+6. **Local web UI** — last; only after at least three of the above ship and benefit from a UI.
+
+## Verification Standards Met
+
+- A new reader can produce the first deck-brief and storyboard within one hour using `install-and-use.md`. (Validated in W2; the actual time was under 15 minutes for a 5-slide topic.)
+- No conflicting terminology between SKILL.md and references (`production_mode` vs `budget_mode` are uniformly named after the W6 sweep).
+- Both `any2ppt-dev inspect` and `inspect-marketplace` (in-repo and cross-repo) pass with the v0.2.0 manifest.
+- The quality gate is callable, not aspirational: `any2ppt-dev review` produced findings on every test run during the roadmap.
+
+## Outstanding Items Worth Recording
+
+- `local-runs/smoke-text-input/run.json` is the only run created before W1 added `--mode` / `--budget` to `new-run`. It still has `production_mode = null`. Left intentionally to keep the W1 finding visible; will be regenerated when the smoke run is re-validated against the V2 plugin.
+- The `review` tool's content-rule warnings on existing storyboards are useful diagnostics, not red flags. They say "this slide is genuinely outside the standard band" rather than "this slide is broken".
+- The cross-repo install flow is verified up to `inspect-marketplace`; the actual click-to-install in Cursor is still UI-only. If the install protocol changes, this gap will be visible to users before maintainers.

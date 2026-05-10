@@ -1,7 +1,7 @@
 {
   "name": "any2ppt",
-  "version": "0.1.0",
-  "description": "A practical production workflow for turning source material into presentation-ready deck briefs, storyboards, and slide visual prompts.",
+  "version": "0.2.0",
+  "description": "A practical production workflow for turning text, PDF, or URL source material into presentation-ready deck briefs, storyboards, and per-slide visual direction. Mode-aware (image-first / pptx-native / hybrid) with rule-based quality review.",
   "author": {
     "name": "fores"
   },
@@ -11,13 +11,15 @@
     "slides",
     "deck",
     "storyboard",
-    "workflow"
+    "workflow",
+    "pdf",
+    "url"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Any2PPT",
-    "shortDescription": "Turn source material into presentation-ready deck plans.",
-    "longDescription": "Any2PPT coordinates a budget-aware deck production workflow: understand source material, shape the argument, plan slide storyboards, direct visuals, and check the result before delivery.",
+    "shortDescription": "Turn text, PDF, or URL source material into presentation-ready deck plans.",
+    "longDescription": "Any2PPT coordinates a budget-aware deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, direct visuals, and run a rule-based review before delivery. Five specialist skills: deck-producer, document-ingestor, story-architect, slide-storyboarder, visual-director. Three production modes: image-first, pptx-native (experimental), hybrid.",
     "developerName": "fores",
     "category": "Productivity",
     "capabilities": [
@@ -27,6 +29,7 @@
     "defaultPrompt": [
       "Turn this transcript into a deck storyboard.",
       "Create slide prompts from this outline.",
+      "Ingest this PDF (or URL) and start a deck.",
       "Review this deck plan for weak slides."
     ],
     "brandColor": "#2563EB"

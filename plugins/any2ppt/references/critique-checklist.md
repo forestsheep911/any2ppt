@@ -1,6 +1,6 @@
 # Critique Checklist
 
-Use this checklist before treating a deck plan or prompt pack as ready.
+Use this checklist before treating a deck plan or prompt pack as ready. The `any2ppt-dev review` subcommand automates the structural items (artifact presence, slide-ID format, archetype names, slide-count band, per-archetype support-point band, prompt-to-storyboard mapping). The judgement items below still require a human read.
 
 ## Argument
 
@@ -29,6 +29,8 @@ Use this checklist before treating a deck plan or prompt pack as ready.
 ## Production
 
 - The output matches the selected budget mode.
+- Production mode is recorded in `run.json` and the brief's "Skill Notes".
 - Intermediate artifact paths are clear.
 - Expensive steps are explicit.
 - Future work is separated from v1 deliverables.
+- `any2ppt-dev review --run <name>` was run and `dist/review.md` is archived in the run folder.
