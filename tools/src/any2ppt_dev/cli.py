@@ -14,7 +14,7 @@ DEFAULT_PLUGIN = REPO_ROOT / "plugins" / "any2ppt"
 DEFAULT_RUNS_DIR = REPO_ROOT / "local-runs"
 DEFAULT_MARKETPLACE = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 TEXT_SOURCE_SUFFIXES = {".md", ".markdown", ".txt"}
-PRODUCTION_MODES = ("image-first", "pptx-native", "hybrid")
+PRODUCTION_MODES = ("image-first",)
 
 
 def _load_skill_frontmatter(skill_md: Path) -> dict[str, object]:
@@ -132,6 +132,7 @@ def new_run(
     mode: str | None,
     budget: str | None,
 ) -> int:
+    mode = mode or "image-first"
     kind = _classify_source(source)
 
     if kind == "text":
@@ -156,18 +157,14 @@ def new_run(
     artifacts: dict[str, str] = {
         "deck_brief": "work/deck-brief.md",
         "storyboard": "work/storyboard.md",
+        "prompt_readme": "prompts/README.md",
+        "prompt_files": "prompts/<slide-id>.md",
+        "generated_slides": "assets/generated-slides/<slide-id>.png",
     }
-    if mode in (None, "image-first", "hybrid"):
-        artifacts["prompt_readme"] = "prompts/README.md"
-        artifacts["prompt_files"] = "prompts/<slide-id>.md"
-    if mode in ("pptx-native", "hybrid"):
-        artifacts["layouts"] = "work/layouts.md"
     artifacts["dist"] = "dist/"
     artifacts["review"] = "dist/review.md"
 
-    children: list[str] = ["source", "work", "dist"]
-    if mode in (None, "image-first", "hybrid"):
-        children.append("prompts")
+    children: list[str] = ["source", "work", "prompts", "assets/generated-slides", "dist"]
     for child in children:
         (run_dir / child).mkdir(parents=True, exist_ok=True)
 
@@ -205,10 +202,7 @@ def new_run(
 
     print(f"created run: {run_dir}")
     print(f"source ({kind}): {target_source}")
-    if mode is None:
-        print("production_mode: not set (deck-producer must record it before delivery)")
-    else:
-        print(f"production_mode: {mode}")
+    print(f"production_mode: {mode}")
     if budget is None:
         print("budget_mode: not set")
     else:
@@ -389,14 +383,6 @@ def _scan_prompts(run_dir: Path, storyboard_ids: list[str]) -> list[tuple[str, s
             findings.append(("warn", "PROMPT-ORPHAN", f"prompt prompts/{pid}.md has no matching storyboard slide"))
     return findings
 
-
-def _scan_layouts(run_dir: Path) -> list[tuple[str, str, str]]:
-    layouts_path = run_dir / "work" / "layouts.md"
-    if not layouts_path.is_file():
-        return [("error", "LAYOUTS-001", "work/layouts.md missing (required for pptx-native or hybrid mode)")]
-    return []
-
-
 def review(run_dir: Path) -> int:
     run_dir = run_dir.resolve()
     if not run_dir.is_dir():
@@ -431,10 +417,7 @@ def review(run_dir: Path) -> int:
     budget = manifest.get("budget_mode") if isinstance(manifest, dict) else None
     if storyboard_ids and isinstance(budget, str):
         findings.extend(_scan_slide_count(budget, len(storyboard_ids)))
-    if mode in (None, "image-first", "hybrid"):
-        findings.extend(_scan_prompts(run_dir, storyboard_ids))
-    if mode in ("pptx-native", "hybrid"):
-        findings.extend(_scan_layouts(run_dir))
+    findings.extend(_scan_prompts(run_dir, storyboard_ids))
 
     counts = {"error": 0, "warn": 0}
     for sev, _, _ in findings:
@@ -477,17 +460,11 @@ def main() -> int:
     new_run_parser.add_argument("--name", help="Run name. Defaults to the source filename stem (or URL host+path).")
     new_run_parser.add_argument("--runs-dir", type=Path, default=DEFAULT_RUNS_DIR)
     new_run_parser.add_argument("--force", action="store_true", help="Reuse an existing run directory and replace source copy")
-    new_run_parser.add_argument("--mode", choices=PRODUCTION_MODES, help="Production mode (recorded in run.json). If omitted, deck-producer must record it before delivery.")
+    new_run_parser.add_argument("--mode", choices=PRODUCTION_MODES, default="image-first", help="Production mode. V0.3 supports image-first only.")
     new_run_parser.add_argument("--budget", choices=("quick", "balanced", "premium"), help="Budget mode (recorded in run.json).")
 
     review_parser = subparsers.add_parser("review", help="Run rule-based quality checks on a run folder and write dist/review.md")
     review_parser.add_argument("--run", type=Path, required=True, help="Path to the run directory to review.")
-
-    pptx_parser = subparsers.add_parser("pptx", help="Experimental pptx-native helpers")
-    pptx_sub = pptx_parser.add_subparsers(dest="pptx_command", required=True)
-    pptx_draft_parser = pptx_sub.add_parser("draft", help="Render a storyboard into an experimental .pptx (cover + thesis archetypes only)")
-    pptx_draft_parser.add_argument("--storyboard", type=Path, required=True, help="Path to work/storyboard.md")
-    pptx_draft_parser.add_argument("--out", type=Path, required=True, help="Output .pptx path")
 
     ingest_parser = subparsers.add_parser("ingest", help="Convert a PDF or URL into source/input.md (Markdown)")
     ingest_group = ingest_parser.add_mutually_exclusive_group(required=True)
@@ -505,10 +482,6 @@ def main() -> int:
         return new_run(args.source, args.name, args.runs_dir, args.force, args.mode, args.budget)
     if args.command == "review":
         return review(args.run)
-    if args.command == "pptx" and args.pptx_command == "draft":
-        from any2ppt_dev.pptx_draft import draft as pptx_draft
-
-        return pptx_draft(args.storyboard, args.out)
     if args.command == "ingest":
         from any2ppt_dev.ingest import ingest_pdf, ingest_url
 

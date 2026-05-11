@@ -1,6 +1,6 @@
 # Budget Modes
 
-Budget mode is picked **after** production mode (see [workflow.md](workflow.md)). Mode says what kind of artifact the deck becomes; budget says how thoroughly each step is executed. The default when the user is silent is `balanced`.
+Any2PPT v0.3 has one active route: image-first with actual image generation when generated slides are requested. Budget mode says how thoroughly that route is executed. The default when the user is silent is `balanced`.
 
 ## quick
 
@@ -24,7 +24,7 @@ Default scope:
 - Deck brief.
 - Slide storyboard.
 - Visual direction.
-- Per-slide image prompts when requested (image-first or hybrid mode) or `work/layouts.md` (pptx-native mode).
+- Per-slide image prompts.
 - Lightweight quality check via `any2ppt-dev review`.
 
 Target slide count: **7-10**.
@@ -38,7 +38,7 @@ Default scope:
 - Deck brief.
 - Slide storyboard.
 - Visual direction.
-- Generated images or PPTX assembly when tools are available. In image-first mode, "generated images" means images produced by an image-generation model/tool, not locally rendered screenshots or PIL/canvas output.
+- Generated images when `$imagegen` is available. "Generated images" means images produced by the official `$imagegen` skill, not locally rendered screenshots or PIL/canvas output.
 - Render or screenshot review.
 - Iteration on weak slides.
 

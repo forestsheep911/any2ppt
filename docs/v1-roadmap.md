@@ -1,5 +1,7 @@
 # Any2PPT V1 Roadmap
 
+> Archive note: this roadmap records historical V1 planning. As of v0.3, Any2PPT intentionally removes active `pptx-native` and `hybrid` routing. The live plugin route is image-first generation only.
+
 ## Purpose
 
 This roadmap turns the [Any2PPT plugin vision](any2ppt-plugin-vision.md) into a concrete six-week delivery schedule.

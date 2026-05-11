@@ -109,25 +109,24 @@ uv run any2ppt-dev new-run `
   --source "<workdir>\sources\<topic>.md" `
   --name <topic> `
   --runs-dir "<workdir>" `
-  --mode image-first `
   --budget balanced
 ```
 
 For a PDF source (the `document-ingestor` skill is invoked automatically to convert the PDF into `source/input.md`):
 
 ```powershell
-uv run any2ppt-dev new-run --source "<workdir>\sources\<topic>.pdf" --name <topic> --runs-dir "<workdir>" --mode image-first --budget balanced
+uv run any2ppt-dev new-run --source "<workdir>\sources\<topic>.pdf" --name <topic> --runs-dir "<workdir>" --budget balanced
 ```
 
 For a URL source (the page is fetched, the main content area is extracted, and the result is written to `source/input.md`):
 
 ```powershell
-uv run any2ppt-dev new-run --source "https://example.com/<post>" --name <topic> --runs-dir "<workdir>" --mode image-first --budget balanced
+uv run any2ppt-dev new-run --source "https://example.com/<post>" --name <topic> --runs-dir "<workdir>" --budget balanced
 ```
 
 `--runs-dir` lets the run folder land in `<workdir>` instead of the default `<any2ppt-repo>\local-runs\`.
 
-`--mode` and `--budget` are recorded in `run.json`. Pick mode before budget; see the `deck-producer` skill for guidance. If you skip `--mode`, the run is still created but `production_mode` is left null and `deck-producer` must record it before delivery.
+`production_mode` and `budget_mode` are recorded in `run.json`. In v0.3, `production_mode` is always `image-first`; `--mode` is optional and accepts only `image-first`.
 
 You can also call the ingestor on its own (useful when you want to review the extracted Markdown before creating the run):
 
@@ -152,7 +151,7 @@ Inside Cursor, in `<workdir>`, ask the installed `any2ppt` plugin to produce the
 2. `slide-storyboarder` to produce `<run-name>/work/storyboard.md`.
 3. `visual-director` to produce `<run-name>/prompts/README.md` and `<run-name>/prompts/<slide-id>.md`.
 
-For pptx-native mode, `visual-director` writes `<run-name>/work/layouts.md` instead of the prompts pack.
+For generated slides, use the prompt pack with the official `$imagegen` skill and save PNGs under `<run-name>/assets/generated-slides/`. If you later need a PPTX, package those already generated PNGs as full-slide images; do not switch to a native-PPTX assembly path.
 
 ## Step 6 — Quality Gate
 
@@ -164,7 +163,7 @@ The walk-through used the topic *"Why a project should pin its Python version"* 
 
 1. **Cross-repo `inspect-marketplace` crashed with `relative_to` error.** When the plugin in `<workdir>/.agents/plugins/marketplace.json` lives in a different repository (absolute path), the dev tool tried to make the path relative to `<workdir>` and raised `ValueError`. **Fixed** in this iteration: `inspect-marketplace` now falls back to an absolute display path on `ValueError`.
 
-2. **`new-run` did not record production mode or budget.** The new W1 skill text requires `production_mode` to be tracked in `run.json`, but `new-run` had no way to write it. **Fixed**: `--mode` and `--budget` flags added; both fields are now in `run.json`. The default mode is left null so `deck-producer` is forced to make the choice explicit.
+2. **`new-run` did not record production mode or budget.** The new W1 skill text requires `production_mode` to be tracked in `run.json`, but `new-run` had no way to write it. **Fixed**: `production_mode` and `budget_mode` are now in `run.json`. In v0.3, the only active production mode is `image-first`.
 
 3. **`any2ppt-dev` requires `cd <any2ppt-repo>\tools` before every call.** The dev tool is not on `PATH`. For now the wrapper invocation in this document works, but a future improvement is to publish `any2ppt-dev` as a globally installable script (likely a `pipx install <any2ppt-repo>/tools` recipe) so a fresh contributor does not need to navigate into the repo.
 
@@ -181,7 +180,7 @@ The artifacts produced during the walk-through stay outside the repo (`local-run
 
 ## Known Limitations
 
-- `pptx-native` mode produces `work/layouts.md` only. The `pptx-assembler` is not yet implemented; an experimental two-archetype prototype lives in `any2ppt-dev pptx draft` (see [pptx-native-experiment.md](pptx-native-experiment.md)).
-- Hybrid mode is described in skill text but not yet exercised by the dev tool.
+- Native PPTX assembly is not an active v0.3 route. Generated PNGs may be packaged into PPTX as non-editable full-slide images, but image generation must happen first.
+- Hybrid mode is not an active v0.3 route.
 - `document-ingestor` (PDF + URL) handles plain documents only — no OCR, no JavaScript-rendered pages, no authenticated URLs. See `plugins/any2ppt/skills/document-ingestor/SKILL.md` for the full limitations list.
 - `youtube-ingestor`, `audio-transcriber`, and DOCX/PPTX/XLSX ingestion are V2 work, not V1.

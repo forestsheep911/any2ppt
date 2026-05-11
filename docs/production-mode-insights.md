@@ -1,5 +1,7 @@
 # Production Mode Insights
 
+> Archive note: this document records historical research. It is not active plugin guidance for v0.3. The active Any2PPT route is image-first generation only, using the official image generation capability for slide PNGs. `pptx-native` and `hybrid` should not be offered during normal plugin runs.
+
 ## Context
 
 This note records an early Any2PPT plugin test from:

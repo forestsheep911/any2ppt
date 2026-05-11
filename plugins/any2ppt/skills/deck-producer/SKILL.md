@@ -1,57 +1,46 @@
 ---
 name: deck-producer
-description: Main Any2PPT coordinator for budget-aware presentation production. Use when Codex needs to turn source material, transcripts, notes, or outlines into a deck workflow; choose quick, balanced, or premium scope; coordinate story architecture, slide storyboarding, visual direction, and delivery artifacts.
+description: Main Any2PPT coordinator for image-first presentation production. Use when Codex needs to turn source material, transcripts, notes, or outlines into a deck workflow; choose quick, balanced, or premium scope; coordinate story architecture, slide storyboarding, visual direction, the official $imagegen skill, and delivery artifacts.
 ---
 
 # Deck Producer
 
-Act as the production owner for Any2PPT deck work. Optimize for a usable presentation under real constraints: source quality, token budget, time, image generation cost, and requested output.
+Act as the production owner for Any2PPT deck work. Optimize for a usable image-first presentation under real constraints: source quality, token budget, time, image generation cost, and requested output.
+
+Any2PPT v0.3 has one active production route: **image-first with actual image generation**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
 
 ## Workflow
 
 1. Identify the user's source material and desired output. If the source is a `.pdf` or an `http(s)` URL, route through `document-ingestor` first to produce `source/input.md`.
-2. Choose a **production mode**: `image-first`, `pptx-native`, or `hybrid`. Mode is picked **before** budget.
+2. Record `production_mode: image-first`. Do not ask the user to choose among production modes.
 3. Choose a **budget mode**: `quick`, `balanced`, or `premium`. The default when the user is silent is `balanced`.
 4. Select the minimum specialist workflow needed.
 5. Keep intermediate artifacts in predictable paths.
-6. Apply quality gates before calling the work done.
+6. For balanced or premium runs, invoke the official `$imagegen` skill to generate full-slide images from the prompt pack.
+7. Apply quality gates before calling the work done.
 
 Use `../../references/workflow.md` for the production flow and `../../references/budget-modes.md` for budget decisions.
 
-## Production Mode
+## Image-First Route
 
-Mode decides what kind of artifact the deck eventually becomes; budget decides how thoroughly each step is executed. Skipping mode selection forces every run into image-first by default, because `visual-director` defaults to writing image prompts.
+The only active production mode is `image-first`.
 
-Three modes:
+`visual-director` writes complete per-slide image-generation prompts. The final deck is a sequence of generated full-slide images saved in the run folder. Use this path even if the user eventually wants the images packaged into a `.pptx`.
 
-- **image-first** — `visual-director` writes complete per-slide image-generation prompts; the final deck is a sequence of generated full-slide images. Use when visual polish matters more than downstream editing. The images must come from an image-generation step (for example the available image-generation tool/model). Do not satisfy image-first by drawing slides with PIL/canvas/HTML/SVG/PowerPoint shapes and then exporting screenshots.
-- **pptx-native** — `visual-director` writes layout, chart, table, and image needs (no full image prompts). The final deck is an editable PowerPoint file assembled by `pptx-assembler` (V2 work; the V1 `any2ppt-dev pptx draft` subcommand is an experimental two-archetype prototype, not a production assembler — see [docs/pptx-native-experiment.md](../../../../docs/pptx-native-experiment.md)). Use when the user wants to keep editing in PowerPoint.
-- **hybrid** — combination. Each slide is explicitly tagged image-first or pptx-native in the storyboard. Use when some slides need visual polish and others need editability.
-
-Image-first anti-confusion rule:
+Hard rules:
 
 - A `.pptx` containing one full-slide PNG per slide is only a **packaging format** after the images already exist. It does not prove image-first generation by itself.
-- Programmatically drawing slide PNGs with local code (PIL, matplotlib, browser screenshots, SVG, HTML/CSS, or PowerPoint shapes) is `programmatic-render` / `pptx-native-adjacent`, not image-first generation.
-- If the user asks to "generate images", "use gpt-image", "use gpt-image-2", or "image-first", call or hand off to the image-generation capability for each slide image, then store the resulting PNGs under a path such as `assets/generated-slides/`.
+- Programmatically drawing slide PNGs with local code (PIL, matplotlib, browser screenshots, SVG, HTML/CSS, or PowerPoint shapes) is local rendering, not image-first generation.
+- If the user asks to "generate images", "use gpt-image", "use gpt-image-2", or "image-first", invoke `$imagegen` for each slide image, then store the resulting PNGs under a path such as `assets/generated-slides/`.
+- `$imagegen` is the required handoff for actual slide image generation when that skill is available. Do not replace it with Python, PIL, browser screenshots, SVG, PowerPoint, or other local rendering code.
 - If image generation is not available, stop after prompt production and say that generated slide images are pending; do not fake the generation step with local drawing code.
+- If the user explicitly asks for editable PowerPoint, explain that the active Any2PPT route is image-first and produces non-editable slide images; do not switch to an editable shape-by-shape deck workflow.
 
-Mode selection rules:
-
-- If the user states "I need a PowerPoint I can edit" or asks for `.pptx`, choose `pptx-native`.
-- If the user states "I need slides as images" or asks for visual polish, choose `image-first`.
-- If the user is silent, ask once. Do not silently default. If asking is impossible, default to `image-first` and record the default choice in `run.json` and the brief's "Skill Notes" section.
-
-Mode affects specialist output:
-
-- `image-first` → `visual-director` produces `prompts/README.md` + `prompts/<slide-id>.md`.
-- `pptx-native` → `visual-director` produces `work/layouts.md` (per-slide layout, chart, table, image needs) instead of full image prompts.
-- `hybrid` → `visual-director` produces both `prompts/<slide-id>.md` and `work/layouts.md`, with the storyboard tagging which slides go which way.
-
-Record the chosen mode in:
+Record the route in:
 
 - `run.json` (when the dev tool created the run folder).
 - The deck brief's "Skill Notes" section.
-- The first line of `prompts/README.md` or `work/layouts.md`.
+- The first line of `prompts/README.md`.
 
 ## Source Inputs (V1)
 
@@ -66,8 +55,8 @@ Standard local run shape:
 - `source/input.md` (or `source/input.txt` for raw text)
 - `work/deck-brief.md`
 - `work/storyboard.md`
-- `prompts/README.md` and `prompts/<slide-id>.md` (image-first / hybrid)
-- `work/layouts.md` (pptx-native / hybrid)
+- `prompts/README.md` and `prompts/<slide-id>.md`
+- `assets/generated-slides/<slide-id>.png` when images are generated
 - `dist/` and `dist/review.md`
 
 When the repository development tool is available, create the run folder with:
@@ -92,7 +81,7 @@ Do not run every specialist by default. Skip steps that the user's input already
 
 ## Default Artifacts
 
-Image-first mode (default if mode cannot be confirmed):
+Image-first mode:
 
 - `work/deck-brief.md`
 - `work/storyboard.md`
@@ -101,16 +90,7 @@ Image-first mode (default if mode cannot be confirmed):
 - `assets/generated-slides/<slide-id>.png` only after an actual image-generation step has run (optional in V1, required if the user asked for generated slide images)
 - `dist/<deck-name>.pptx` only as an optional container around generated images, not as the primary image-generation method
 
-PPTX-native mode:
-
-- `work/deck-brief.md`
-- `work/storyboard.md`
-- `work/layouts.md`
-- `dist/<deck-name>.pptx` (when `pptx-assembler` is available)
-
-Hybrid mode produces both `prompts/<slide-id>.md` and `work/layouts.md`.
-
-For v1, prefer these text artifacts over heavy automation. Do not require PPTX assembly, YouTube ingestion, document parsing, or a local UI unless the user explicitly asks for that expansion.
+Do not create native PowerPoint layout specs as a substitute for image prompts. Do not create native PowerPoint shapes as the final deck production path.
 
 ## Quality Gates
 
@@ -121,8 +101,8 @@ Before delivery, verify that:
 - Slide titles are specific and presentable.
 - The sequence has a logical arc.
 - Visual direction supports the argument.
-- In image-first mode, generated PNGs came from an image-generation step if the run claims to have generated images.
+- In image-first mode, generated PNGs came from `$imagegen` if the run claims to have generated images and `$imagegen` was available.
 - The chosen workflow fits the user's budget and timing.
-- Production mode is recorded in `run.json` and the brief's "Skill Notes".
+- `production_mode` is recorded as `image-first` in `run.json` and the brief's "Skill Notes".
 
 Run the gate by either reading every artifact and checking each item by hand, or (preferred when available) by running `any2ppt-dev review --run <name>` and archiving the output to `dist/review.md`. Do not declare delivery without one of the two.

@@ -8,7 +8,7 @@ The plugin should not start as a large automation system. Its first job is to pr
 
 The long-term product can grow into a configurable local tool with style systems, budget choices, source adapters, PPTX assembly, and review loops. Version 1 should stay small enough to use, inspect, and improve.
 
-See `docs/production-mode-insights.md` for the early distinction between image-first, PPTX-native, and hybrid production modes.
+Current direction: Any2PPT v0.3 is image-first only. Historical notes about alternate production modes remain in `docs/production-mode-insights.md`, but they are not active plugin guidance.
 
 ## Product Principle
 
@@ -228,7 +228,7 @@ Candidate skills:
 
 - `youtube-ingestor`: download YouTube audio and produce transcripts.
 - `document-ingestor`: read PDF, DOCX, PPTX, XLSX, and web pages into briefs.
-- `pptx-assembler`: create editable PowerPoint files.
+- PowerPoint packaging: optionally place already generated slide images into a `.pptx` container.
 - `deck-critic`: perform deeper review and recommend slide-level revisions.
 - `style-director`: manage presentation styles, templates, palettes, and typography.
 - `speaker-notes-writer`: generate presenter notes and talk tracks.
@@ -238,7 +238,7 @@ Candidate product parameters:
 
 - Budget: quick, balanced, premium.
 - Output: brief, storyboard, prompts, images, PPTX.
-- Production mode: image-first, PPTX-native, hybrid.
+- Production mode: image-first only in v0.3.
 - Style: editorial, consulting, academic, cinematic, product pitch.
 - Language: Simplified Chinese, Traditional Chinese, English, bilingual.
 - Editability: visual artifact, editable native deck, mixed editable overlays.

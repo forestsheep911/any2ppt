@@ -1,5 +1,7 @@
 # PPTX-Native Breaking Experiment — Week 4 Result
 
+> Archive note: this experiment is historical. As of v0.3, Any2PPT removes the active `pptx-native` route and the dev CLI no longer exposes `any2ppt-dev pptx draft`. The active route is image-first generation only.
+
 ## Goal
 
 Discover the real cost of pptx-native mode at minimum risk. The Week 4 experiment intentionally limits scope to two archetypes (cover, thesis), so the result quantifies "how much does one archetype cost?" rather than "how good can the final deck look?"

@@ -1,7 +1,7 @@
 {
   "name": "any2ppt",
-  "version": "0.2.1",
-  "description": "A practical production workflow for turning text, PDF, or URL source material into presentation-ready deck briefs, storyboards, and per-slide visual direction. Mode-aware (image-first / pptx-native / hybrid) with rule-based quality review.",
+  "version": "0.3.0",
+  "description": "An image-first deck workflow for turning text, PDF, or URL source material into deck briefs, storyboards, image-generation prompts, and generated slide images through the official $imagegen skill.",
   "author": {
     "name": "fores"
   },
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Any2PPT",
-    "shortDescription": "Turn text, PDF, or URL source material into presentation-ready deck plans.",
-    "longDescription": "Any2PPT coordinates a budget-aware deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, direct visuals, and run a rule-based review before delivery. Five specialist skills: deck-producer, document-ingestor, story-architect, slide-storyboarder, visual-director. Three production modes: image-first, pptx-native (experimental), hybrid.",
+    "shortDescription": "Turn source material into image-first slide prompts and generated slide images.",
+    "longDescription": "Any2PPT coordinates an image-first deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, and run a rule-based review before delivery. Five specialist skills: deck-producer, document-ingestor, story-architect, slide-storyboarder, visual-director. V0.3 uses a single $imagegen route to prevent accidental local-rendered or PowerPoint-native output.",
     "developerName": "fores",
     "category": "Productivity",
     "capabilities": [
@@ -28,9 +28,9 @@
     ],
     "defaultPrompt": [
       "Turn this transcript into a deck storyboard.",
-      "Create slide prompts from this outline.",
+      "Create slide prompts and generate images from this outline.",
       "Ingest this PDF (or URL) and start a deck.",
-      "Review this deck plan for weak slides."
+      "Generate image-first slides with image generation."
     ],
     "brandColor": "#2563EB"
   }
