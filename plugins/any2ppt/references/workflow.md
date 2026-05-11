@@ -17,6 +17,8 @@ In this workflow, "image" means an actual image-generation step through the offi
 
 Do not offer alternate native-PowerPoint or mixed production routes as active choices. If the user asks for editable PowerPoint, explain that this plugin currently produces generated slide images, optionally packaged into PPTX as non-editable full-slide images.
 
+Do not delegate an Any2PPT run to installed presentation/PPTX skills or plugins, even if they are available locally. This includes Codex `Presentations` and Anthropic `pptx`. Those skills are native-PPTX assemblers and conflict with the active v0.3 route.
+
 ## Default Flow
 
 1. `deck-producer` interprets the request, source, target output, and budget; it records `production_mode: image-first`.
@@ -73,6 +75,7 @@ Then produce artifacts inside that run folder:
 - If the user wants generated slide images, run `visual-director` first, then invoke `$imagegen` for each prompt. Do not substitute local programmatic rendering.
 - If the user asks for an editable PPTX, state the current limitation and continue only if they accept image-first, non-editable full-slide images.
 - If the user asks for generated images packaged as PPTX, generate PNGs first, then optionally place those PNGs into a PPTX as a non-editable container.
+- If another installed presentation/PPTX skill offers to help, do not route to it. Keep the run inside Any2PPT's own skill chain and `$imagegen`.
 
 ## Artifact Paths
 

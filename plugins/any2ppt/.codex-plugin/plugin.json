@@ -1,6 +1,6 @@
 {
   "name": "any2ppt",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "An image-first deck workflow for turning text, PDF, or URL source material into deck briefs, storyboards, image-generation prompts, and generated slide images through the official $imagegen skill.",
   "author": {
     "name": "fores"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "Any2PPT",
     "shortDescription": "Turn source material into image-first slide prompts and generated slide images.",
-    "longDescription": "Any2PPT coordinates an image-first deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, and run a rule-based review before delivery. Five specialist skills: deck-producer, document-ingestor, story-architect, slide-storyboarder, visual-director. V0.3 uses a single $imagegen route to prevent accidental local-rendered or PowerPoint-native output.",
+    "longDescription": "Any2PPT coordinates an image-first deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, and run a rule-based review before delivery. Five specialist skills: deck-producer, document-ingestor, story-architect, slide-storyboarder, visual-director. V0.3 uses a single $imagegen route to prevent accidental local-rendered or PowerPoint-native output, and should not delegate active runs to installed native-PPTX skills such as Codex Presentations or Anthropic pptx.",
     "developerName": "fores",
     "category": "Productivity",
     "capabilities": [

@@ -22,12 +22,13 @@ Reuse the slide IDs from `work/storyboard.md` verbatim as filenames (`prompts/<s
 
 - Make visuals serve the slide's argument.
 - Avoid decorative-only cinematic backgrounds.
-- Prefer presentation-native forms: timelines, comparison tables, process diagrams, evidence cards, maps, charts, and structured callouts.
+- Prefer slide-oriented visual patterns: timelines, comparison tables, process diagrams, evidence cards, maps, charts, and structured callouts.
 - Keep generated text short, large, high-contrast, and readable.
 - Maintain consistent language, tone, palette, and information density across slides.
 - Treat full-slide images as slide screenshots, not background art, unless the user explicitly asks otherwise.
 - Keep image-first prompts model-ready: include the intended use, visual subject, composition, exact text to render, style constraints, and negative constraints. Avoid instructions that imply the assistant should implement the slide by writing rendering code.
 - If the user asks for a `.pptx` after image generation, treat it as a packaging step around already generated images; do not write native PowerPoint layout specs or local rendering code.
+- Do not call third-party deck/PPTX generation skills such as Codex `Presentations` or Anthropic `pptx` from this skill. Write `$imagegen`-ready prompts only; native deck assembly is outside the active route.
 - Prefer prompts that explicitly say "Use case: productivity-visual" and "Asset type: 16:9 presentation slide image" so `$imagegen` receives an image task, not a PowerPoint assembly task.
 
 ## Reference Sample
