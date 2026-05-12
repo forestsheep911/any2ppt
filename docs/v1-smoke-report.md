@@ -3,7 +3,7 @@
 > Current note: v0.3 makes image-first generation the only active route. Mentions of earlier production-mode ambiguity below are historical context, not current guidance.
 
 ## Run Summary
-- Source: `docs/any2ppt-plugin-vision.md` (~250 lines, structured markdown)
+- Source: `docs/deckit-plugin-vision.md` (~250 lines, structured markdown)
 - Run folder: `local-runs/smoke-text-input/`
 - Produced artifacts:
   - `work/deck-brief.md`
@@ -45,7 +45,7 @@ However, no skill enforces the convention `<two-digit-index>_<snake_case_slug>`.
 
 **Unclear.** `deck-producer/SKILL.md` lists quality gates but does not say who runs the checklist or how to record the result. In this walk-through the gate ran as a manual scan and was logged into this report. Without this report, the gate would have been silent.
 
-**Fix**: this is the second-week deliverable. The `any2ppt-dev review` subcommand will turn the checklist into a callable action. In the meantime `deck-producer/SKILL.md` should require either the checklist run or the `review` tool, with the result archived under `dist/review.md`.
+**Fix**: this is the second-week deliverable. The `deckit-dev review` subcommand will turn the checklist into a callable action. In the meantime `deck-producer/SKILL.md` should require either the checklist run or the `review` tool, with the result archived under `dist/review.md`.
 
 **Severity**: high. Without a callable gate, "quality gate" is decorative.
 
@@ -93,7 +93,7 @@ The walk-through ran end-to-end. All four artifact families exist and are cohere
 
 A later smoke run, `local-runs/smoke-current/` (gitignored), extended the original image-first artifact loop into actual bitmap generation:
 
-- Source: `docs/any2ppt-plugin-vision.md`.
+- Source: `docs/deckit-plugin-vision.md`.
 - Production mode: `image-first`.
 - Budget mode: `balanced`.
 - Generated artifacts:
@@ -107,7 +107,7 @@ A later smoke run, `local-runs/smoke-current/` (gitignored), extended the origin
 
 Result:
 
-- `any2ppt-dev review --run local-runs/smoke-current` passed with 0 errors and 0 warnings.
+- `deckit-dev review --run local-runs/smoke-current` passed with 0 errors and 0 warnings.
 - Eight slide PNGs were generated with external image generation and copied into the run folder.
 - The first cover generation misspelled `Storyboard`; one regeneration fixed it. This confirms the known image-first risk: generated text must be checked, and prompt-side spelling constraints reduce but do not remove the risk.
 

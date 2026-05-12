@@ -1,10 +1,10 @@
-# Any2PPT V1 Roadmap
+# Deckit V1 Roadmap
 
-> Archive note: this roadmap records historical V1 planning. As of v0.3, Any2PPT intentionally removes active `pptx-native` and `hybrid` routing. The live plugin route is image-first generation only.
+> Archive note: this roadmap records historical V1 planning. As of v0.3, Deckit intentionally removes active `pptx-native` and `hybrid` routing. The live plugin route is image-first generation only.
 
 ## Purpose
 
-This roadmap turns the [Any2PPT plugin vision](any2ppt-plugin-vision.md) into a concrete six-week delivery schedule.
+This roadmap turns the [Deckit plugin vision](deckit-plugin-vision.md) into a concrete six-week delivery schedule.
 
 The main thread is "validate first, distill second, extend third". The first job is to prove that the V1 workflow really works end-to-end before adding new capabilities. The roadmap reuses the V1 plugin scope already defined in the vision document; it does not extend that scope, only sequences delivery and adds explicit checks.
 
@@ -66,7 +66,7 @@ flowchart TB
     DP2 --> Deliver[Delivery Summary]
 ```
 
-Skip rules: see [../plugins/any2ppt/references/workflow.md](../plugins/any2ppt/references/workflow.md).
+Skip rules: see [../plugins/deckit/references/workflow.md](../plugins/deckit/references/workflow.md).
 
 ## Six-Week Schedule
 
@@ -94,8 +94,8 @@ Actions:
 
 - Use the existing four skills (deck-producer, story-architect, slide-storyboarder, visual-director) to actually produce `smoke-text-input/work/deck-brief.md`, `work/storyboard.md`, `prompts/README.md`, and `prompts/<slide-id>.md`.
 - Record every "skill text is unclear" or "artifact path collides" issue into `docs/v1-smoke-report.md`.
-- Add a Production Mode section to [../plugins/any2ppt/skills/deck-producer/SKILL.md](../plugins/any2ppt/skills/deck-producer/SKILL.md): mode must be picked before budget, and each mode states which specialist outputs change.
-- Add a "Mode-aware Flow" paragraph at the top of [../plugins/any2ppt/references/workflow.md](../plugins/any2ppt/references/workflow.md).
+- Add a Production Mode section to [../plugins/deckit/skills/deck-producer/SKILL.md](../plugins/deckit/skills/deck-producer/SKILL.md): mode must be picked before budget, and each mode states which specialist outputs change.
+- Add a "Mode-aware Flow" paragraph at the top of [../plugins/deckit/references/workflow.md](../plugins/deckit/references/workflow.md).
 
 Deliverables:
 
@@ -124,14 +124,14 @@ The four skills already exist on paper, but the boundaries between them have not
 
 ### Week 2 — install→use loop and executable critique
 
-Goal: prove the plugin can be installed from the local marketplace into another working directory; turn [../plugins/any2ppt/references/critique-checklist.md](../plugins/any2ppt/references/critique-checklist.md) from a static document into a callable action.
+Goal: prove the plugin can be installed from the local marketplace into another working directory; turn [../plugins/deckit/references/critique-checklist.md](../plugins/deckit/references/critique-checklist.md) from a static document into a callable action.
 
 Actions:
 
-- In a temporary working directory outside this repo, install `any2ppt` via [../.agents/plugins/marketplace.json](../.agents/plugins/marketplace.json) and run a fresh small deck (5-7 slides, simple topic).
+- In a temporary working directory outside this repo, install `deckit` via [../.agents/plugins/marketplace.json](../.agents/plugins/marketplace.json) and run a fresh small deck (5-7 slides, simple topic).
 - Log onboarding pain points: which skill catches the request; whether `new-run` needs to be globally available; whether `work/` and `prompts/` paths work from a non-repo directory.
 - Write `docs/install-and-use.md` containing the minimal repeatable steps.
-- Add `any2ppt-dev review --run <name>` to [../tools/src/any2ppt_dev/cli.py](../tools/src/any2ppt_dev/cli.py), doing rule-based checks (no LLM yet):
+- Add `deckit-dev review --run <name>` to [../tools/src/deckit_dev/cli.py](../tools/src/deckit_dev/cli.py), doing rule-based checks (no LLM yet):
   - `work/deck-brief.md` contains thesis, audience, and arc sections.
   - Each storyboard slide has title, primary job, core claim, and 2-4 support points.
   - Every slide ID in `prompts/` maps to one in the storyboard.
@@ -154,18 +154,18 @@ Goal: lift `local-runs/sanmiao-victory-day` (image-first success case) into an i
 
 Actions:
 
-- Add `plugins/any2ppt/assets/sample-decks/sanmiao-victory-day/` with a slim version:
+- Add `plugins/deckit/assets/sample-decks/sanmiao-victory-day/` with a slim version:
   - `brief.md`: thesis and arc only, no raw transcript.
   - `storyboard.md`: 8-slide table of slide IDs, titles, jobs, claims.
   - `prompts/<slide-id>.md`: cover plus 2-3 representative slide prompt excerpts, free of copyright-sensitive content.
   - `notes.md`: why this deck worked and which choices mattered.
 - Excluded from the repo (kept in ignored `local-runs/`): raw audio, full transcripts, generated images.
-- Add a "Reference Sample" section to both [../plugins/any2ppt/skills/visual-director/SKILL.md](../plugins/any2ppt/skills/visual-director/SKILL.md) and [../plugins/any2ppt/skills/story-architect/SKILL.md](../plugins/any2ppt/skills/story-architect/SKILL.md) pointing at the sanmiao sample.
+- Add a "Reference Sample" section to both [../plugins/deckit/skills/visual-director/SKILL.md](../plugins/deckit/skills/visual-director/SKILL.md) and [../plugins/deckit/skills/story-architect/SKILL.md](../plugins/deckit/skills/story-architect/SKILL.md) pointing at the sanmiao sample.
 - Document the in-repo sample rules (slim, shareable, no rights risk) in [development-layout.md](development-layout.md) under "Plugin Source".
 
 Deliverables:
 
-- Four files under `plugins/any2ppt/assets/sample-decks/sanmiao-victory-day/`.
+- Four files under `plugins/deckit/assets/sample-decks/sanmiao-victory-day/`.
 - Reference Sample sections in two SKILL.md files.
 - A sample-rules paragraph in development-layout.md.
 
@@ -180,7 +180,7 @@ Goal: discover the real cost of pptx-native mode at minimum risk, to decide Week
 
 Actions:
 
-- Without touching the plugin or deck-producer, add an experimental `pptx` subcommand under `tools/src/any2ppt_dev/`: `any2ppt-dev pptx draft --storyboard <path> --out <pptx>`, supporting two archetypes only: cover and thesis.
+- Without touching the plugin or deck-producer, add an experimental `pptx` subcommand under `tools/src/deckit_dev/`: `deckit-dev pptx draft --storyboard <path> --out <pptx>`, supporting two archetypes only: cover and thesis.
 - Use `python-pptx` (add to [../tools/pyproject.toml](../tools/pyproject.toml) dependencies).
 - Input: Week 1's `smoke-text-input/work/storyboard.md`. Output: `local-runs/smoke-text-input/dist/draft.pptx`.
 - Open the file in PowerPoint and score subjectively: layout readability, font size, alignment, whitespace, assembly code volume.
@@ -202,19 +202,19 @@ Verification:
 Route A — continue pptx-native (if experiment positive):
 
 - Add 3-4 more archetypes to `pptx`: comparison, evidence-cards, process, closing.
-- Draft `plugins/any2ppt/skills/pptx-assembler/SKILL.md`: define the contract "accept storyboard, output .pptx, follow archetype templates" without implementing inside the plugin yet.
+- Draft `plugins/deckit/skills/pptx-assembler/SKILL.md`: define the contract "accept storyboard, output .pptx, follow archetype templates" without implementing inside the plugin yet.
 - Promote `pptx-native` mode in deck-producer from theoretical option to callable action.
 
 Route B — pivot to document-ingestor (if cost too high):
 
-- Draft `plugins/any2ppt/skills/document-ingestor/SKILL.md`, supporting PDF and URL inputs first.
-- PDF reuses `~/.agents/skills/pdf`; URL uses a minimal fetcher (`any2ppt-dev ingest --pdf|--url` writes `source/input.md`).
+- Draft `plugins/deckit/skills/document-ingestor/SKILL.md`, supporting PDF and URL inputs first.
+- PDF reuses `~/.agents/skills/pdf`; URL uses a minimal fetcher (`deckit-dev ingest --pdf|--url` writes `source/input.md`).
 - Extend `new-run` so a `--source` of PDF or URL invokes the ingestor automatically.
 
 Deliverables (per route):
 
 - A: 3-4 new archetype assembly code blocks plus `pptx-assembler/SKILL.md`.
-- B: `document-ingestor/SKILL.md`, `any2ppt-dev ingest`, plus one PDF and one URL real ingest sample.
+- B: `document-ingestor/SKILL.md`, `deckit-dev ingest`, plus one PDF and one URL real ingest sample.
 
 Verification:
 
@@ -227,11 +227,11 @@ Goal: close the six-week loop and ship plugin v0.2.0.
 
 Actions:
 
-- Add 2-3 more content-aware rules to `review` (slide title length cap, archetype name validated against [../plugins/any2ppt/references/slide-archetypes.md](../plugins/any2ppt/references/slide-archetypes.md)).
+- Add 2-3 more content-aware rules to `review` (slide title length cap, archetype name validated against [../plugins/deckit/references/slide-archetypes.md](../plugins/deckit/references/slide-archetypes.md)).
 - Sweep all four SKILL.md and four reference files in one pass to absorb Week 1-5 findings.
 - Write `docs/v1-status.md`: what V1 shipped, what it did not, V2 candidates including the Week 4 outcome.
-- Bump [../plugins/any2ppt/.codex-plugin/plugin.json](../plugins/any2ppt/.codex-plugin/plugin.json) to `0.2.0` and update description.
-- Run `any2ppt-dev inspect` and `inspect-marketplace` cleanly; record the output in v1-status.md.
+- Bump [../plugins/deckit/.codex-plugin/plugin.json](../plugins/deckit/.codex-plugin/plugin.json) to `0.2.0` and update description.
+- Run `deckit-dev inspect` and `inspect-marketplace` cleanly; record the output in v1-status.md.
 
 Deliverables:
 

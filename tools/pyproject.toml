@@ -1,7 +1,7 @@
 [project]
-name = "any2ppt-dev-tools"
+name = "deckit-dev-tools"
 version = "0.1.0"
-description = "Development utilities for the Any2PPT Codex plugin."
+description = "Development utilities for the Deckit Codex plugin."
 requires-python = ">=3.11"
 dependencies = [
   "pyyaml>=6.0.2",
@@ -12,11 +12,11 @@ dependencies = [
 ]
 
 [project.scripts]
-any2ppt-dev = "any2ppt_dev.cli:main"
+deckit-dev = "deckit_dev.cli:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/any2ppt_dev"]
+packages = ["src/deckit_dev"]

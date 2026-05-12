@@ -1,14 +1,15 @@
 {
-  "name": "any2ppt-local",
+  "name": "deckit-dev",
   "interface": {
-    "displayName": "Any2PPT Local Marketplace"
+    "displayName": "Deckit (dev, local source)",
+    "description": "Development-only marketplace for testing the local plugin source in this repo. End users should install deckit via the 'built by 2water' marketplace (forestsheep911/built-by-2water) instead."
   },
   "plugins": [
     {
-      "name": "any2ppt",
+      "name": "deckit",
       "source": {
         "source": "local",
-        "path": "./plugins/any2ppt"
+        "path": "./plugins/deckit"
       },
       "policy": {
         "installation": "AVAILABLE",

@@ -1,6 +1,6 @@
 ---
 name: slide-storyboarder
-description: Convert an Any2PPT deck brief, outline, or narrative plan into a slide-by-slide storyboard. Use when Codex needs page titles, slide purposes, core claims, support points, slide archetypes, and presenter intent before visual design.
+description: Convert an Deckit deck brief, outline, or narrative plan into a slide-by-slide storyboard. Use when Codex needs page titles, slide purposes, core claims, support points, slide archetypes, and presenter intent before visual design.
 ---
 
 # Slide Storyboarder
@@ -35,7 +35,7 @@ Examples: `00_cover`, `03_production_team`, `07_closing`.
 ## Guidance
 
 - Give each slide one job.
-- Write titles that can be spoken aloud by a presenter, and keep titles under 80 characters (the `any2ppt-dev review` tool warns above this).
+- Write titles that can be spoken aloud by a presenter, and keep titles under 80 characters (the `deckit-dev review` tool warns above this).
 - Avoid repetitive slide structures unless the repetition has a purpose.
 - Keep support points short enough to become slide text.
 - Include transitions when the deck's logic could feel abrupt.
@@ -51,7 +51,7 @@ Target slide counts per budget mode:
 - `balanced`: 7-10 slides
 - `premium`: 8-14 slides
 
-The `any2ppt-dev review` tool warns when the storyboard's slide count is outside the band for the chosen budget. A documented exception is allowed (record the reason in the storyboard's Deck Meta or in the brief's Skill Notes).
+The `deckit-dev review` tool warns when the storyboard's slide count is outside the band for the chosen budget. A documented exception is allowed (record the reason in the storyboard's Deck Meta or in the brief's Skill Notes).
 
 ## Support Point Counts by Archetype
 
@@ -64,4 +64,4 @@ The default rule is 2-4 support points per slide. Some archetypes break this rul
 - `thesis`: 2-6 (multiple pillars allowed).
 - All other archetypes: 2-4.
 
-The `any2ppt-dev review` tool enforces these per-archetype bands; treat its warnings as evidence to either reshape the slide or document the exception.
+The `deckit-dev review` tool enforces these per-archetype bands; treat its warnings as evidence to either reshape the slide or document the exception.

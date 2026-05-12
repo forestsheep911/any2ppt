@@ -1,6 +1,6 @@
 # PPTX-Native Breaking Experiment — Week 4 Result
 
-> Archive note: this experiment is historical. As of v0.3, Any2PPT removes the active `pptx-native` route and the dev CLI no longer exposes `any2ppt-dev pptx draft`. The active route is image-first generation only.
+> Archive note: this experiment is historical. As of v0.3, Deckit removes the active `pptx-native` route and the dev CLI no longer exposes `deckit-dev pptx draft`. The active route is image-first generation only.
 
 ## Goal
 
@@ -11,12 +11,12 @@ Discover the real cost of pptx-native mode at minimum risk. The Week 4 experimen
 A new experimental subcommand:
 
 ```powershell
-uv run any2ppt-dev pptx draft `
+uv run deckit-dev pptx draft `
   --storyboard <work/storyboard.md> `
   --out <dist/draft.pptx>
 ```
 
-It is implemented in [tools/src/any2ppt_dev/pptx_draft.py](../tools/src/any2ppt_dev/pptx_draft.py) and uses `python-pptx`. Two archetypes are implemented:
+It is implemented in [tools/src/deckit_dev/pptx_draft.py](../tools/src/deckit_dev/pptx_draft.py) and uses `python-pptx`. Two archetypes are implemented:
 
 - **Cover**: tag, large title, optional subtitle, optional source line.
 - **Thesis (4-pillar)**: title, single-sentence thesis, four equal rounded-rectangle pillars across the bottom half.
@@ -47,7 +47,7 @@ Scored on a 1–5 scale by opening the file in PowerPoint at 100% zoom on a 1080
 
 ## Cost Quantification
 
-- Implementation file ([pptx_draft.py](../tools/src/any2ppt_dev/pptx_draft.py)): 211 lines of Python including parser, helpers, and two archetype renderers.
+- Implementation file ([pptx_draft.py](../tools/src/deckit_dev/pptx_draft.py)): 211 lines of Python including parser, helpers, and two archetype renderers.
   - Storyboard parser + dataclasses: ~70 lines (reusable across all future archetypes).
   - Common helpers (`_add_textbox`, `_set_background`, `_pick_support`): ~50 lines (also reusable).
   - Cover renderer: ~25 lines.
@@ -85,11 +85,11 @@ The experiment proves three things:
 - Pptx-native is **not** going to reach image-first quality in the remaining two weeks.
 - Even reaching "useful draft" parity for the other six archetypes will consume the entire Week 5 budget on layout code, with theming and master layouts still queued behind it for V2.
 
-Meanwhile, image-first is the high-quality path the project already has, and the largest remaining gap in `any2ppt` as a product is **input variety**. The "any" in `any2ppt` is currently text-only. Adding `document-ingestor` (PDF + URL) immediately broadens the surface and reuses the existing `~/.agents/skills/pdf` skill, which is a much cheaper unit-of-value than the next pptx-native archetype.
+Meanwhile, image-first is the high-quality path the project already has, and the largest remaining gap in `deckit` as a product is **input variety**. The "any" in `deckit` is currently text-only. Adding `document-ingestor` (PDF + URL) immediately broadens the surface and reuses the existing `~/.agents/skills/pdf` skill, which is a much cheaper unit-of-value than the next pptx-native archetype.
 
 **Recommendation for Week 5: Route B — start `document-ingestor`** (PDF + URL inputs first).
 
-The pptx-native experiment is not abandoned. The experimental `any2ppt-dev pptx draft` subcommand stays in the dev tool as a V2 starting point. When pptx-native returns in V2, the work order should be:
+The pptx-native experiment is not abandoned. The experimental `deckit-dev pptx draft` subcommand stays in the dev tool as a V2 starting point. When pptx-native returns in V2, the work order should be:
 
 1. Theme module (palette, font ladder, spacing tokens).
 2. Master slide layouts (one per archetype).
@@ -100,13 +100,13 @@ That sequence will cost more up front but pay off across every later archetype, 
 
 ## Artifacts
 
-- Code: [tools/src/any2ppt_dev/pptx_draft.py](../tools/src/any2ppt_dev/pptx_draft.py)
-- Subcommand wiring: [tools/src/any2ppt_dev/cli.py](../tools/src/any2ppt_dev/cli.py)
+- Code: [tools/src/deckit_dev/pptx_draft.py](../tools/src/deckit_dev/pptx_draft.py)
+- Subcommand wiring: [tools/src/deckit_dev/cli.py](../tools/src/deckit_dev/cli.py)
 - Generated draft: `local-runs/smoke-text-input/dist/draft.pptx` (gitignored; reproduce with the command above).
 
 ## Post-Experiment Field Note (2026-05-10)
 
-A separate, third-party native-PPTX run was performed using the official Codex `Presentations` plugin (a different system than Any2PPT, but the same production mode) on the sanmiao Victory Day topic, and compared head-to-head with the Any2PPT image-first sample. Test workspace: `C:\Users\fores\Documents\New project 3`.
+A separate, third-party native-PPTX run was performed using the official Codex `Presentations` plugin (a different system than Deckit, but the same production mode) on the sanmiao Victory Day topic, and compared head-to-head with the Deckit image-first sample. Test workspace: `C:\Users\fores\Documents\New project 3`.
 
 The field comparison reinforced the W4 conclusion (image-first wins on first impression) and added a sharper concern about pptx-native's strategic value: editability is only useful if the draft is good enough to edit rather than redo. The Route B pivot recorded above is unchanged; the V2 case for `pptx-assembler` now needs to clear additional bars before resuming.
 

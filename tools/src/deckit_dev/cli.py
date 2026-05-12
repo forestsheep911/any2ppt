@@ -10,7 +10,7 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_PLUGIN = REPO_ROOT / "plugins" / "any2ppt"
+DEFAULT_PLUGIN = REPO_ROOT / "plugins" / "deckit"
 DEFAULT_RUNS_DIR = REPO_ROOT / "local-runs"
 DEFAULT_MARKETPLACE = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 TEXT_SOURCE_SUFFIXES = {".md", ".markdown", ".txt"}
@@ -99,7 +99,7 @@ def _ensure_inside(parent: Path, child: Path) -> None:
 
 def _classify_source(source: str) -> str:
     """Return one of: 'url', 'pdf', 'text'."""
-    from any2ppt_dev.ingest import is_url
+    from deckit_dev.ingest import is_url
 
     if is_url(source):
         return "url"
@@ -178,7 +178,7 @@ def new_run(
         target_source = run_dir / "source" / "input.md"
         if target_source.exists() and not force:
             raise FileExistsError(f"source already exists: {target_source}. Use --force to replace it.")
-        from any2ppt_dev.ingest import ingest_pdf, ingest_url
+        from deckit_dev.ingest import ingest_pdf, ingest_url
 
         if kind == "pdf":
             ingest_pdf(source_path, target_source)
@@ -502,7 +502,7 @@ def review(run_dir: Path) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Any2PPT development tools")
+    parser = argparse.ArgumentParser(description="Deckit development tools")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     inspect_parser = subparsers.add_parser("inspect", help="Inspect the plugin manifest and skills")
@@ -539,7 +539,7 @@ def main() -> int:
     if args.command == "review":
         return review(args.run)
     if args.command == "ingest":
-        from any2ppt_dev.ingest import ingest_pdf, ingest_url
+        from deckit_dev.ingest import ingest_pdf, ingest_url
 
         if args.pdf is not None:
             return ingest_pdf(args.pdf, args.out)

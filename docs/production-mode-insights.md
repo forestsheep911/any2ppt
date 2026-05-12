@@ -1,16 +1,16 @@
 # Production Mode Insights
 
-> Archive note: this document records historical research. It is not active plugin guidance for v0.3. The active Any2PPT route is image-first generation only, using the official image generation capability for slide PNGs. `pptx-native` and `hybrid` should not be offered during normal plugin runs.
+> Archive note: this document records historical research. It is not active plugin guidance for v0.3. The active Deckit route is image-first generation only, using the official image generation capability for slide PNGs. `pptx-native` and `hybrid` should not be offered during normal plugin runs.
 
 ## Context
 
-This note records an early Any2PPT plugin test from:
+This note records an early Deckit plugin test from:
 
 - Test workspace: `C:\Users\fores\Documents\New project 2`
 - Native PPTX output: `C:\Users\fores\Documents\New project 2\dist\eutectic-one-slide.pptx`
-- Earlier image-first sample: `C:\Users\fores\dev\trytry\any2ppt\local-runs\sanmiao-victory-day\assets\generated-slides`
+- Earlier image-first sample: `C:\Users\fores\dev\trytry\deckit\local-runs\sanmiao-victory-day\assets\generated-slides`
 
-The test prompt asked Any2PPT to explain the eutectic phenomenon in one slide. The reasoning trace showed a deck/slide workflow and generated a `.pptx` output that PowerPoint can edit directly.
+The test prompt asked Deckit to explain the eutectic phenomenon in one slide. The reasoning trace showed a deck/slide workflow and generated a `.pptx` output that PowerPoint can edit directly.
 
 The output file was inspected as a PPTX package:
 
@@ -23,7 +23,7 @@ This confirms the test followed a PPTX-native production mode rather than an ima
 
 ## Key Finding
 
-Any2PPT should not mean "always create a native PowerPoint file."
+Deckit should not mean "always create a native PowerPoint file."
 
 The project name is a product shorthand for creating presentation material. The production mode can vary:
 
@@ -118,7 +118,7 @@ Production mode:
 
 Do not remove PPTX-native mode. It is strategically valuable even if the current aesthetic quality is weaker.
 
-Do not make PPTX-native the only definition of Any2PPT. The stronger current path for artistic expression is image-first generation.
+Do not make PPTX-native the only definition of Deckit. The stronger current path for artistic expression is image-first generation.
 
 Near-term development should keep both paths visible:
 
@@ -137,7 +137,7 @@ Longer term, PPTX-native output may become more competitive through:
 
 ## Updated View — Field Validation (Codex Presentations Plugin)
 
-A second native-PPTX run was performed on 2026-05-10 using the official Codex `Presentations` plugin (a different system than Any2PPT) on the sanmiao Victory Day topic, and compared head-to-head with the Any2PPT image-first sample under `local-runs/sanmiao-victory-day/`.
+A second native-PPTX run was performed on 2026-05-10 using the official Codex `Presentations` plugin (a different system than Deckit) on the sanmiao Victory Day topic, and compared head-to-head with the Deckit image-first sample under `local-runs/sanmiao-victory-day/`.
 
 Test workspace: `C:\Users\fores\Documents\New project 3`.
 

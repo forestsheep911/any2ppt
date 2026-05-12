@@ -1,13 +1,13 @@
 ---
 name: deck-producer
-description: Main Any2PPT coordinator for image-first presentation production. Use when Codex needs to turn source material, transcripts, notes, or outlines into a deck workflow; choose quick, balanced, or premium scope; coordinate story architecture, slide storyboarding, visual direction, the official $imagegen skill, and delivery artifacts.
+description: Main Deckit coordinator for image-first presentation production. Use when Codex needs to turn source material, transcripts, notes, or outlines into a deck workflow; choose quick, balanced, or premium scope; coordinate story architecture, slide storyboarding, visual direction, the official $imagegen skill, and delivery artifacts.
 ---
 
 # Deck Producer
 
-Act as the production owner for Any2PPT deck work. Optimize for a usable image-first presentation under real constraints: source quality, token budget, time, image generation cost, and requested output.
+Act as the production owner for Deckit deck work. Optimize for a usable image-first presentation under real constraints: source quality, token budget, time, image generation cost, and requested output.
 
-Any2PPT v0.3 has one active production route: **image-first with actual image generation**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
+Deckit v0.3 has one active production route: **image-first with actual image generation**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
 
 ## Workflow
 
@@ -31,11 +31,11 @@ Hard rules:
 
 - A `.pptx` containing one full-slide PNG per slide is only a **packaging format** after the images already exist. It does not prove image-first generation by itself.
 - Programmatically drawing slide PNGs with local code (PIL, matplotlib, browser screenshots, SVG, HTML/CSS, or PowerPoint shapes) is local rendering, not image-first generation.
-- Do not invoke third-party presentation/PPTX skills or plugins during Any2PPT runs, including Codex `Presentations` and Anthropic `pptx`. They tend to produce native PowerPoint elements and will pull the workflow back into a route v0.3 intentionally disables.
+- Do not invoke third-party presentation/PPTX skills or plugins during Deckit runs, including Codex `Presentations` and Anthropic `pptx`. They tend to produce native PowerPoint elements and will pull the workflow back into a route v0.3 intentionally disables.
 - If the user asks to "generate images", "use gpt-image", "use gpt-image-2", or "image-first", invoke `$imagegen` for each slide image, then store the resulting PNGs under a path such as `assets/generated-slides/`.
 - `$imagegen` is the required handoff for actual slide image generation when that skill is available. Do not replace it with Python, PIL, browser screenshots, SVG, PowerPoint, or other local rendering code.
 - If image generation is not available, stop after prompt production and say that generated slide images are pending; do not fake the generation step with local drawing code.
-- If the user explicitly asks for editable PowerPoint, explain that the active Any2PPT route is image-first and produces non-editable slide images; do not switch to an editable shape-by-shape deck workflow.
+- If the user explicitly asks for editable PowerPoint, explain that the active Deckit route is image-first and produces non-editable slide images; do not switch to an editable shape-by-shape deck workflow.
 
 Record the route in:
 
@@ -64,9 +64,9 @@ When the repository development tool is available, create the run folder with:
 
 ```powershell
 cd tools
-uv run any2ppt-dev new-run --source ..\path\to\source.md --name run-name --mode image-first --budget balanced
-uv run any2ppt-dev new-run --source ..\path\to\source.pdf --name run-name --mode image-first --budget balanced
-uv run any2ppt-dev new-run --source https://example.com/post --name run-name --mode image-first --budget balanced
+uv run deckit-dev new-run --source ..\path\to\source.md --name run-name --mode image-first --budget balanced
+uv run deckit-dev new-run --source ..\path\to\source.pdf --name run-name --mode image-first --budget balanced
+uv run deckit-dev new-run --source https://example.com/post --name run-name --mode image-first --budget balanced
 ```
 
 Use the run folder as the working root for specialist outputs.
@@ -106,4 +106,4 @@ Before delivery, verify that:
 - The chosen workflow fits the user's budget and timing.
 - `production_mode` is recorded as `image-first` in `run.json` and the brief's "Skill Notes".
 
-Run the gate by either reading every artifact and checking each item by hand, or (preferred when available) by running `any2ppt-dev review --run <name>` and archiving the output to `dist/review.md`. Do not declare delivery without one of the two.
+Run the gate by either reading every artifact and checking each item by hand, or (preferred when available) by running `deckit-dev review --run <name>` and archiving the output to `dist/review.md`. Do not declare delivery without one of the two.

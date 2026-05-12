@@ -1,20 +1,20 @@
-# Install and Use Any2PPT in a Fresh Working Directory
+# Install and Use Deckit in a Fresh Working Directory
 
-This document describes the minimal steps to install and use the Any2PPT plugin from a working directory **outside** this repository, using the local marketplace. It is the result of the Week 2 install-loop validation walk-through.
+This document describes the minimal steps to install and use the Deckit plugin from a working directory **outside** this repository, using the local marketplace. It is the result of the Week 2 install-loop validation walk-through.
 
 ## Goal
 
 Prove that:
 
-1. A new working directory can install `any2ppt` via the local marketplace.
+1. A new working directory can install `deckit` via the local marketplace.
 2. A new contributor can produce the first `deck-brief.md` in under 30 minutes.
 3. Any developer-tool friction surfaces early, not after release.
 
 ## Prerequisites
 
 - Cursor (or any client that consumes Codex plugins) installed locally.
-- Python `>=3.11` and `uv` installed (only required to use `any2ppt-dev` from the source tree).
-- A local clone of the `any2ppt` repository (referred to below as `<any2ppt-repo>`).
+- Python `>=3.11` and `uv` installed (only required to use `deckit-dev` from the source tree).
+- A local clone of the `deckit` repository (referred to below as `<deckit-repo>`).
 
 ## Layout of a Fresh Working Directory
 
@@ -24,10 +24,10 @@ A typical setup looks like this:
 <workdir>/
 ├── .agents/
 │   └── plugins/
-│       └── marketplace.json     # points at <any2ppt-repo>/plugins/any2ppt
+│       └── marketplace.json     # points at <deckit-repo>/plugins/deckit
 ├── sources/
 │   └── <topic>.md               # the source material you want to turn into slides
-└── <run-name>/                  # created later by `any2ppt-dev new-run`
+└── <run-name>/                  # created later by `deckit-dev new-run`
     ├── run.json
     ├── source/
     ├── work/
@@ -43,16 +43,16 @@ Create `<workdir>/.agents/plugins/marketplace.json`:
 
 ```json
 {
-  "name": "any2ppt-local",
+  "name": "deckit-local",
   "interface": {
-    "displayName": "Any2PPT Local Marketplace"
+    "displayName": "Deckit Local Marketplace"
   },
   "plugins": [
     {
-      "name": "any2ppt",
+      "name": "deckit",
       "source": {
         "source": "local",
-        "path": "C:/Users/you/path/to/any2ppt/plugins/any2ppt"
+        "path": "C:/Users/you/path/to/deckit/plugins/deckit"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -69,25 +69,25 @@ The `source.path` field accepts an **absolute path** when the plugin lives in a 
 Verify the marketplace parses cleanly before installing:
 
 ```powershell
-cd <any2ppt-repo>\tools
-uv run any2ppt-dev inspect-marketplace --marketplace "<workdir>\.agents\plugins\marketplace.json"
+cd <deckit-repo>\tools
+uv run deckit-dev inspect-marketplace --marketplace "<workdir>\.agents\plugins\marketplace.json"
 ```
 
 Expected output:
 
 ```text
-marketplace: any2ppt-local
+marketplace: deckit-local
 plugins: 1
-- any2ppt: <absolute path to plugin>
+- deckit: <absolute path to plugin>
 ```
 
 If this command fails, fix the marketplace before continuing.
 
 ## Step 2 — Install the Plugin in Cursor
 
-Open `<workdir>` in Cursor. The local marketplace is auto-discovered from `.agents/plugins/marketplace.json`. Install the `any2ppt` plugin from the plugin panel; the policy `installation: AVAILABLE` makes it appear as installable.
+Open `<workdir>` in Cursor. The local marketplace is auto-discovered from `.agents/plugins/marketplace.json`. Install the `deckit` plugin from the plugin panel; the policy `installation: AVAILABLE` makes it appear as installable.
 
-> Note: the plugin install flow itself happens inside Cursor and is not scriptable from `any2ppt-dev` today. The `inspect-marketplace` command above is the strongest CLI-side verification available.
+> Note: the plugin install flow itself happens inside Cursor and is not scriptable from `deckit-dev` today. The `inspect-marketplace` command above is the strongest CLI-side verification available.
 
 ## Step 3 — Drop Source Material
 
@@ -104,8 +104,8 @@ For text sources, place the file under `<workdir>/sources/<topic>.md`. For PDFs,
 For a text source:
 
 ```powershell
-cd <any2ppt-repo>\tools
-uv run any2ppt-dev new-run `
+cd <deckit-repo>\tools
+uv run deckit-dev new-run `
   --source "<workdir>\sources\<topic>.md" `
   --name <topic> `
   --runs-dir "<workdir>" `
@@ -115,24 +115,24 @@ uv run any2ppt-dev new-run `
 For a PDF source (the `document-ingestor` skill is invoked automatically to convert the PDF into `source/input.md`):
 
 ```powershell
-uv run any2ppt-dev new-run --source "<workdir>\sources\<topic>.pdf" --name <topic> --runs-dir "<workdir>" --budget balanced
+uv run deckit-dev new-run --source "<workdir>\sources\<topic>.pdf" --name <topic> --runs-dir "<workdir>" --budget balanced
 ```
 
 For a URL source (the page is fetched, the main content area is extracted, and the result is written to `source/input.md`):
 
 ```powershell
-uv run any2ppt-dev new-run --source "https://example.com/<post>" --name <topic> --runs-dir "<workdir>" --budget balanced
+uv run deckit-dev new-run --source "https://example.com/<post>" --name <topic> --runs-dir "<workdir>" --budget balanced
 ```
 
-`--runs-dir` lets the run folder land in `<workdir>` instead of the default `<any2ppt-repo>\local-runs\`.
+`--runs-dir` lets the run folder land in `<workdir>` instead of the default `<deckit-repo>\local-runs\`.
 
 `production_mode` and `budget_mode` are recorded in `run.json`. In v0.3, `production_mode` is always `image-first`; `--mode` is optional and accepts only `image-first`.
 
 You can also call the ingestor on its own (useful when you want to review the extracted Markdown before creating the run):
 
 ```powershell
-uv run any2ppt-dev ingest --pdf "<file.pdf>" --out "<workdir>\sources\<topic>.md"
-uv run any2ppt-dev ingest --url "https://..."   --out "<workdir>\sources\<topic>.md"
+uv run deckit-dev ingest --pdf "<file.pdf>" --out "<workdir>\sources\<topic>.md"
+uv run deckit-dev ingest --url "https://..."   --out "<workdir>\sources\<topic>.md"
 ```
 
 Inspect the result:
@@ -145,7 +145,7 @@ You should see `production_mode`, `budget_mode`, and a `source.type` of `text`, 
 
 ## Step 5 — Produce the Deck
 
-Inside Cursor, in `<workdir>`, ask the installed `any2ppt` plugin to produce the deck. The `deck-producer` skill takes over. By default it calls:
+Inside Cursor, in `<workdir>`, ask the installed `deckit` plugin to produce the deck. The `deck-producer` skill takes over. By default it calls:
 
 1. `story-architect` to produce `<run-name>/work/deck-brief.md`.
 2. `slide-storyboarder` to produce `<run-name>/work/storyboard.md`.
@@ -155,17 +155,17 @@ For generated slides, use the prompt pack with the official `$imagegen` skill an
 
 ## Step 6 — Quality Gate
 
-Until the `any2ppt-dev review` subcommand lands (Week 2 second deliverable), run the [critique checklist](../plugins/any2ppt/references/critique-checklist.md) by hand and write findings to `<run-name>/dist/review.md`.
+Until the `deckit-dev review` subcommand lands (Week 2 second deliverable), run the [critique checklist](../plugins/deckit/references/critique-checklist.md) by hand and write findings to `<run-name>/dist/review.md`.
 
 ## Findings From the Validation Walk-through
 
-The walk-through used the topic *"Why a project should pin its Python version"* in `C:\Users\fores\dev\trytry\any2ppt-install-test\` and produced a five-slide deck end-to-end. Time to first brief was under 15 minutes (well within the 30-minute target). Four real frictions surfaced:
+The walk-through used the topic *"Why a project should pin its Python version"* in `C:\Users\fores\dev\trytry\deckit-install-test\` and produced a five-slide deck end-to-end. Time to first brief was under 15 minutes (well within the 30-minute target). Four real frictions surfaced:
 
 1. **Cross-repo `inspect-marketplace` crashed with `relative_to` error.** When the plugin in `<workdir>/.agents/plugins/marketplace.json` lives in a different repository (absolute path), the dev tool tried to make the path relative to `<workdir>` and raised `ValueError`. **Fixed** in this iteration: `inspect-marketplace` now falls back to an absolute display path on `ValueError`.
 
 2. **`new-run` did not record production mode or budget.** The new W1 skill text requires `production_mode` to be tracked in `run.json`, but `new-run` had no way to write it. **Fixed**: `production_mode` and `budget_mode` are now in `run.json`. In v0.3, the only active production mode is `image-first`.
 
-3. **`any2ppt-dev` requires `cd <any2ppt-repo>\tools` before every call.** The dev tool is not on `PATH`. For now the wrapper invocation in this document works, but a future improvement is to publish `any2ppt-dev` as a globally installable script (likely a `pipx install <any2ppt-repo>/tools` recipe) so a fresh contributor does not need to navigate into the repo.
+3. **`deckit-dev` requires `cd <deckit-repo>\tools` before every call.** The dev tool is not on `PATH`. For now the wrapper invocation in this document works, but a future improvement is to publish `deckit-dev` as a globally installable script (likely a `pipx install <deckit-repo>/tools` recipe) so a fresh contributor does not need to navigate into the repo.
 
 4. **There is no CLI step that exercises the actual plugin install flow.** Steps 1 and 4 are CLI-verifiable. Step 2 (the click-to-install in Cursor) is not. The strongest evidence today that install will work is `inspect-marketplace` succeeding plus the manifest passing `inspect`. If the plugin install protocol changes, this gap will become visible to new users before it is visible to maintainers.
 
@@ -173,7 +173,7 @@ The walk-through used the topic *"Why a project should pin its Python version"* 
 
 The artifacts produced during the walk-through stay outside the repo (`local-runs/` and `<workdir>/` are both ignored). Recreate them locally with the steps above. Reference paths used during validation:
 
-- Workdir: `C:\Users\fores\dev\trytry\any2ppt-install-test\`
+- Workdir: `C:\Users\fores\dev\trytry\deckit-install-test\`
 - Source: `<workdir>\sources\pin-python-version.md`
 - Run: `<workdir>\pin-python-version\`
 - Files produced: `work/deck-brief.md`, `work/storyboard.md`, `prompts/README.md`, `prompts/00_cover.md` ... `prompts/04_closing.md`
@@ -182,5 +182,5 @@ The artifacts produced during the walk-through stay outside the repo (`local-run
 
 - Native PPTX assembly is not an active v0.3 route. Generated PNGs may be packaged into PPTX as non-editable full-slide images, but image generation must happen first.
 - Hybrid mode is not an active v0.3 route.
-- `document-ingestor` (PDF + URL) handles plain documents only — no OCR, no JavaScript-rendered pages, no authenticated URLs. See `plugins/any2ppt/skills/document-ingestor/SKILL.md` for the full limitations list.
+- `document-ingestor` (PDF + URL) handles plain documents only — no OCR, no JavaScript-rendered pages, no authenticated URLs. See `plugins/deckit/skills/document-ingestor/SKILL.md` for the full limitations list.
 - `youtube-ingestor`, `audio-transcriber`, and DOCX/PPTX/XLSX ingestion are V2 work, not V1.

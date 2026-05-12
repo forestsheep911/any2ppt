@@ -1,6 +1,6 @@
 ---
 name: visual-director
-description: Direct the visual treatment for Any2PPT slide storyboards. Use when Codex needs per-slide visual strategy, layout guidance, or image-generation prompts for presentation slides with readable text and argument-supporting visuals.
+description: Direct the visual treatment for Deckit slide storyboards. Use when Codex needs per-slide visual strategy, layout guidance, or image-generation prompts for presentation slides with readable text and argument-supporting visuals.
 ---
 
 # Visual Director
@@ -9,7 +9,7 @@ Turn a slide storyboard into visual treatments and model-ready image-generation 
 
 ## Output
 
-Any2PPT v0.3 has one active production route: image-first with actual image generation. Create:
+Deckit v0.3 has one active production route: image-first with actual image generation. Create:
 
 - `prompts/README.md` with global style direction and source references. Its first line should record the production mode.
 - `prompts/<slide-id>.md` with one complete prompt per slide.

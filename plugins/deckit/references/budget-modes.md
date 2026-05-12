@@ -1,6 +1,6 @@
 # Budget Modes
 
-Any2PPT v0.3 has one active route: image-first with actual image generation when generated slides are requested. Budget mode says how thoroughly that route is executed. The default when the user is silent is `balanced`.
+Deckit v0.3 has one active route: image-first with actual image generation when generated slides are requested. Budget mode says how thoroughly that route is executed. The default when the user is silent is `balanced`.
 
 ## quick
 
@@ -25,7 +25,7 @@ Default scope:
 - Slide storyboard.
 - Visual direction.
 - Per-slide image prompts.
-- Lightweight quality check via `any2ppt-dev review`.
+- Lightweight quality check via `deckit-dev review`.
 
 Target slide count: **7-10**.
 
@@ -44,7 +44,7 @@ Default scope:
 
 Target slide count: **8-14**.
 
-The `any2ppt-dev review` tool warns when the storyboard's slide count is outside the band. Document an exception (e.g. a narrow technical topic that genuinely fits in fewer slides) in the brief's "Skill Notes".
+The `deckit-dev review` tool warns when the storyboard's slide count is outside the band. Document an exception (e.g. a narrow technical topic that genuinely fits in fewer slides) in the brief's "Skill Notes".
 
 ## Downgrade Choices
 

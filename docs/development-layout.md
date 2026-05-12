@@ -5,11 +5,11 @@ This repository separates product artifacts, plugin source, development tools, a
 ## Directory Roles
 
 ```text
-any2ppt/
+deckit/
 ├── .agents/plugins/       # Local marketplace metadata for plugin install testing
 ├── docs/                  # Vision, architecture, and development notes
 ├── plugins/               # Codex plugin source directories
-│   └── any2ppt/           # Source of the Any2PPT plugin
+│   └── deckit/           # Source of the Deckit plugin
 ├── tools/                 # Repo-local development tools managed by uv
 ├── local-runs/            # Ignored one-off experiments and working artifacts
 └── dist/                  # Ignored generated release artifacts
@@ -17,7 +17,7 @@ any2ppt/
 
 ## Plugin Source
 
-`plugins/any2ppt/` is the canonical plugin source directory.
+`plugins/deckit/` is the canonical plugin source directory.
 
 Keep files here limited to plugin runtime contents:
 
@@ -32,7 +32,7 @@ Do not store local experiments, raw media, generated prompt packs, or release zi
 
 ## Sample Decks
 
-`plugins/any2ppt/assets/sample-decks/<deck-name>/` holds slim, in-tree teaching examples that specialist skills can reference. A sample deck typically contains:
+`plugins/deckit/assets/sample-decks/<deck-name>/` holds slim, in-tree teaching examples that specialist skills can reference. A sample deck typically contains:
 
 - `brief.md`: the slim deck brief (no raw transcript or external content).
 - `storyboard.md`: the per-slide plan.
@@ -56,15 +56,15 @@ It points to the source plugin with:
 
 ```json
 {
-  "name": "any2ppt",
+  "name": "deckit",
   "source": {
     "source": "local",
-    "path": "./plugins/any2ppt"
+    "path": "./plugins/deckit"
   }
 }
 ```
 
-Use this marketplace to test the future workflow where Any2PPT is discovered, installed, and then used from another working directory. Keep marketplace paths relative to the repository root.
+Use this marketplace to test the future workflow where Deckit is discovered, installed, and then used from another working directory. Keep marketplace paths relative to the repository root.
 
 ## Development Tools
 
@@ -74,10 +74,10 @@ Python tooling should be managed with `uv` from inside `tools/`:
 
 ```powershell
 cd tools
-uv run any2ppt-dev --help
+uv run deckit-dev --help
 ```
 
-Development tools may read `../plugins/any2ppt/`, but should not be required for the plugin to load at runtime.
+Development tools may read `../plugins/deckit/`, but should not be required for the plugin to load at runtime.
 
 ## Local Runs
 
@@ -95,7 +95,7 @@ Create a standard text-input run with:
 
 ```powershell
 cd tools
-uv run any2ppt-dev new-run --source ..\path\to\source.md --name topic-name
+uv run deckit-dev new-run --source ..\path\to\source.md --name topic-name
 ```
 
 The command creates:
@@ -116,14 +116,14 @@ Use `work/` for `deck-brief.md` and `storyboard.md`, `prompts/` for visual promp
 
 `dist/` is ignored by git. Use it for generated plugin packages, export bundles, or other publication artifacts.
 
-The source of truth remains `plugins/any2ppt/`. Release artifacts should be reproducible from committed source and development tools.
+The source of truth remains `plugins/deckit/`. Release artifacts should be reproducible from committed source and development tools.
 
 ## Practical Rule
 
 When adding a file, decide its role first:
 
 - Product decision or architecture note: `docs/`
-- Plugin behavior used by Codex: `plugins/any2ppt/`
+- Plugin behavior used by Codex: `plugins/deckit/`
 - Build, validation, or packaging helper: `tools/`
 - One-off experiment or generated run output: `local-runs/`
 - Generated release package: `dist/`

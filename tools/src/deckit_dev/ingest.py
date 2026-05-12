@@ -53,7 +53,7 @@ def ingest_url(url: str, out_path: Path) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (any2ppt-dev ingest)",
+        "User-Agent": "Mozilla/5.0 (deckit-dev ingest)",
     }
     with httpx.Client(timeout=30.0, follow_redirects=True, headers=headers) as client:
         resp = client.get(url)

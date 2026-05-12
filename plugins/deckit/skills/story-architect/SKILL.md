@@ -1,6 +1,6 @@
 ---
 name: story-architect
-description: Build the narrative foundation for Any2PPT decks. Use when source material, transcripts, notes, or articles need to become a presentation thesis, audience framing, narrative arc, and section-level deck brief before slide planning.
+description: Build the narrative foundation for Deckit decks. Use when source material, transcripts, notes, or articles need to become a presentation thesis, audience framing, narrative arc, and section-level deck brief before slide planning.
 ---
 
 # Story Architect

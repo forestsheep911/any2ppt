@@ -32,12 +32,12 @@ When the dev tool is available, use either of these forms:
 cd tools
 
 # Standalone ingest (writes a Markdown file you can review before creating a run)
-uv run any2ppt-dev ingest --pdf <file.pdf> --out <run>\source\input.md
-uv run any2ppt-dev ingest --url <https://example.com/post> --out <run>\source\input.md
+uv run deckit-dev ingest --pdf <file.pdf> --out <run>\source\input.md
+uv run deckit-dev ingest --url <https://example.com/post> --out <run>\source\input.md
 
 # Or have new-run call the ingestor automatically
-uv run any2ppt-dev new-run --source <file.pdf> --name <run>
-uv run any2ppt-dev new-run --source https://example.com/post --name <run>
+uv run deckit-dev new-run --source <file.pdf> --name <run>
+uv run deckit-dev new-run --source https://example.com/post --name <run>
 ```
 
 `new-run` infers the source type from the value: a `.pdf` suffix triggers the PDF ingestor; an `http://` or `https://` prefix triggers the URL ingestor; anything else is treated as a text file.

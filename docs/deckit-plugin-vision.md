@@ -1,18 +1,18 @@
-# Any2PPT Plugin Vision
+# Deckit Plugin Vision
 
 ## Purpose
 
-Any2PPT is a Codex plugin for turning source material into presentation-ready decks.
+Deckit is a Codex plugin for turning source material into presentation-ready decks.
 
 The plugin should not start as a large automation system. Its first job is to preserve a repeatable creative workflow: understand the source, shape the argument, plan the slides, direct the visuals, and check whether the result is actually usable as a presentation.
 
 The long-term product can grow into a configurable local tool with style systems, budget choices, source adapters, PPTX assembly, and review loops. Version 1 should stay small enough to use, inspect, and improve.
 
-Current direction: Any2PPT v0.3 is image-first only. Historical notes about alternate production modes remain in `docs/production-mode-insights.md`, but they are not active plugin guidance.
+Current direction: Deckit v0.3 is image-first only. Historical notes about alternate production modes remain in `docs/production-mode-insights.md`, but they are not active plugin guidance.
 
 ## Product Principle
 
-Any2PPT should behave like a practical production team, not like an unconstrained generator.
+Deckit should behave like a practical production team, not like an unconstrained generator.
 
 The plugin must balance:
 
@@ -76,7 +76,7 @@ Those are extension points, not first-version requirements.
 ## Suggested V1 Plugin Structure
 
 ```text
-plugins/any2ppt/
+plugins/deckit/
 ├── .codex-plugin/
 │   └── plugin.json
 ├── skills/
@@ -249,7 +249,7 @@ Candidate product parameters:
 Avoid turning V1 into a large platform.
 
 Do not require a UI before the command-line and skill workflow are useful.
-Do not duplicate mature PDF, PPTX, XLSX, or document skills unless the Any2PPT workflow needs a stable wrapper.
+Do not duplicate mature PDF, PPTX, XLSX, or document skills unless the Deckit workflow needs a stable wrapper.
 Do not hide cost: when an output requires many generated images, multiple critique passes, or heavy transcription, `deck-producer` should make that visible.
 Do not let visual polish outrun argument quality.
 
@@ -257,7 +257,7 @@ Do not let visual polish outrun argument quality.
 
 The first usable milestone is:
 
-1. Scaffold the `any2ppt` plugin.
+1. Scaffold the `deckit` plugin.
 2. Implement `deck-producer`, `story-architect`, `slide-storyboarder`, and `visual-director`.
 3. Move the successful Sanmiao deck flow into `assets/sample-decks/` or references as an example.
 4. Validate that a new transcript can produce:

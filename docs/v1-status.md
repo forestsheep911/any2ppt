@@ -1,4 +1,4 @@
-# Any2PPT V1 Status — v0.3.2
+# Deckit V1 Status — v0.3.2
 
 This is the closing report for the six-week V1 validation roadmap defined in [v1-roadmap.md](v1-roadmap.md). It records what shipped, what did not, and what is queued for V2+.
 
@@ -12,13 +12,13 @@ This is the closing report for the six-week V1 validation roadmap defined in [v1
   - `document-ingestor` (added in Week 5 as the post-W4 route).
 - Production mode recognized by the active workflow: `image-first` only.
 - Source kinds accepted by `new-run`: text / Markdown, `.pdf`, `http(s)` URL.
-- Quality gate: `any2ppt-dev review --run <name>` writes `dist/review.md` with structural checks for run.json validity, brief sections, storyboard slide blocks, slide-id format, per-archetype support-point band, archetype-name validation, slide-count band per budget, and prompts ↔ storyboard mapping.
+- Quality gate: `deckit-dev review --run <name>` writes `dist/review.md` with structural checks for run.json validity, brief sections, storyboard slide blocks, slide-id format, per-archetype support-point band, archetype-name validation, slide-count band per budget, and prompts ↔ storyboard mapping.
 
 ### Inspect Output Snapshot
 
 ```text
 === INSPECT ===
-plugin: any2ppt
+plugin: deckit
 version: 0.3.2
 skills: 5
 - deck-producer: skills\deck-producer
@@ -28,14 +28,14 @@ skills: 5
 - visual-director: skills\visual-director
 
 === INSPECT-MARKETPLACE (in-repo) ===
-marketplace: any2ppt-local
+marketplace: deckit-local
 plugins: 1
-- any2ppt: plugins\any2ppt
+- deckit: plugins\deckit
 
 === INSPECT-MARKETPLACE (cross-repo) ===
-marketplace: any2ppt-local
+marketplace: deckit-local
 plugins: 1
-- any2ppt: C:\Users\fores\dev\trytry\any2ppt\plugins\any2ppt
+- deckit: C:\Users\fores\dev\trytry\deckit\plugins\deckit
 ```
 
 ## What V1 Ships
@@ -43,8 +43,8 @@ plugins: 1
 ### Plugin
 
 - Five specialist `SKILL.md` files with explicit roles, outputs, do-nots, and (where relevant) reference samples.
-- Four references: [workflow](../plugins/any2ppt/references/workflow.md), [budget-modes](../plugins/any2ppt/references/budget-modes.md), [slide-archetypes](../plugins/any2ppt/references/slide-archetypes.md), [critique-checklist](../plugins/any2ppt/references/critique-checklist.md). Terminology is unified across files (e.g. `production_mode` vs `budget_mode` are named consistently).
-- One in-tree teaching sample: `plugins/any2ppt/assets/sample-decks/sanmiao-victory-day/` (image-first), referenced from `story-architect` and `visual-director`.
+- Four references: [workflow](../plugins/deckit/references/workflow.md), [budget-modes](../plugins/deckit/references/budget-modes.md), [slide-archetypes](../plugins/deckit/references/slide-archetypes.md), [critique-checklist](../plugins/deckit/references/critique-checklist.md). Terminology is unified across files (e.g. `production_mode` vs `budget_mode` are named consistently).
+- One in-tree teaching sample: `plugins/deckit/assets/sample-decks/sanmiao-victory-day/` (image-first), referenced from `story-architect` and `visual-director`.
 
 ### Documentation
 
@@ -54,7 +54,7 @@ plugins: 1
 - Archived Week 4 alternate-output experiment — cost quantification and the route-B pivot recommendation. Historical only, not current plugin guidance.
 - [development-layout.md](development-layout.md) — repo layout, with new "Sample Decks" inclusion rules added in Week 3.
 
-### Dev Tool (`any2ppt-dev`)
+### Dev Tool (`deckit-dev`)
 
 Six subcommands:
 
@@ -68,10 +68,10 @@ Six subcommands:
 
 - Text source end-to-end: `local-runs/smoke-text-input/` (W1).
 - Image-first generation smoke: `local-runs/smoke-current/` (2026-05-11; gitignored). This validated source → brief → storyboard → prompts → 8 generated slide PNGs → visual review, using external image generation rather than plugin-internal API calls.
-- Cross-repo install + small deck: `C:\Users\fores\dev\trytry\any2ppt-install-test\pin-python-version\` (W2; gitignored).
+- Cross-repo install + small deck: `C:\Users\fores\dev\trytry\deckit-install-test\pin-python-version\` (W2; gitignored).
 - Sanmiao image-first sample: in-tree slim version (W3).
 - PPTX-native experimental draft: `local-runs/smoke-text-input/dist/draft.pptx` (W4; historical only, removed from the active v0.3 CLI).
-- PDF + URL ingest end-to-end: `any2ppt-install-test/ingest-test/{pdf,url}-end-to-end/` with deck-brief produced for both (W5).
+- PDF + URL ingest end-to-end: `deckit-install-test/ingest-test/{pdf,url}-end-to-end/` with deck-brief produced for both (W5).
 
 ## What V1 Did Not Ship (deferred, as planned)
 
@@ -99,8 +99,8 @@ The Week 4 decision and Week 5 result reorder the V2 backlog from the original v
 
 - A new reader can produce the first deck-brief and storyboard within one hour using `install-and-use.md`. (Validated in W2; the actual time was under 15 minutes for a 5-slide topic.)
 - No conflicting terminology between SKILL.md and references (`production_mode` vs `budget_mode` are uniformly named after the W6 sweep).
-- Both `any2ppt-dev inspect` and `inspect-marketplace` pass with the v0.3.2 manifest.
-- The quality gate is callable, not aspirational: `any2ppt-dev review` produced findings on every test run during the roadmap.
+- Both `deckit-dev inspect` and `inspect-marketplace` pass with the v0.3.2 manifest.
+- The quality gate is callable, not aspirational: `deckit-dev review` produced findings on every test run during the roadmap.
 - The image-first artifact loop has been exercised through actual bitmap generation once: 8 PNG slides were generated from `prompts/*.md`, copied into the run folder, and reviewed in `dist/image-first-review.md`.
 
 ## Outstanding Items Worth Recording
