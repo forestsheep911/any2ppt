@@ -60,6 +60,10 @@ Forbidden outputs and fallbacks:
 
 If the user explicitly requires editable native PowerPoint text boxes, shapes, or charts, state that Deckit does not support editable native-PPTX production in the active route. Continue only if they accept image-first slides.
 
+Visual polish does not make a deck image-first. A native PowerPoint deck with attractive backgrounds, text boxes, shapes, timelines, and images is still forbidden native-PPTX. If `$imagegen` did not produce `assets/generated-slides/<slide-id>.png` for every storyboard slide, stop at the prompt pack; do not create a substitute visual PPTX.
+
+Do not create native-PPTX first and then backfill Deckit artifacts (`run.json`, `work/`, `prompts/`, or `dist/review.md`). Deckit artifacts must drive production before delivery.
+
 ## PPTX Container Packaging
 
 If a `.pptx` deliverable is requested, generate slide PNGs first, then package those PNGs as full-slide images. The stable route is:
@@ -75,7 +79,13 @@ Packaging requirements:
 - The package must have one slide per storyboard slide, in storyboard order.
 - Each PPTX slide should contain exactly one full-slide image and no editable native content.
 - Do not hand-author minimal OpenXML packages for delivery; use the stable packaging command or an equivalent proven PPTX writer.
-- Validate with `deckit-dev review --run <run-folder>` after packaging.
+- Validate with `deckit-dev audit-pptx --pptx <file.pptx>` and `deckit-dev review --run <run-folder>` after packaging.
+
+The PPTX audit passes only when each slide contains exactly one full-slide picture. Text boxes, PowerPoint shapes, lines, charts, tables, or multiple slide-canvas objects mean the file is native-PPTX and not a valid Deckit deliverable.
+
+## Debug Evidence
+
+When a run fails, looks suspicious, or the user asks why a route was chosen, preserve a debug trail before changing artifacts. Capture the prompt, route, commands, tool outputs, review results, PPTX audit results, and paths to every intermediate artifact. Prefer `dist/debug-evidence.md` for this trace.
 
 ## Default Flow
 

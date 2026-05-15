@@ -53,6 +53,22 @@ If the user explicitly requires editable PowerPoint objects, state the limitatio
 
 > Deckit does not produce editable native-PPTX decks in the active route. I can continue with image-first full-slide images, optionally packaged into a non-editable `.pptx` container.
 
+## No Substitute Visual PPTX
+
+Visual polish does not make a deck image-first. A visually designed PowerPoint file is still native-PPTX if its slides contain editable text boxes, PowerPoint shapes, lines, charts, tables, or layout objects.
+
+If `$imagegen` was not invoked and `assets/generated-slides/<slide-id>.png` does not exist for every storyboard slide, do not deliver a PPTX. Stop at the prompt pack and say generated slide images are pending.
+
+Do not create native PowerPoint layouts as a substitute for generated images. Do not create a native-PPTX first and then backfill Deckit artifacts (`run.json`, `work/`, `prompts/`, or `dist/review.md`) to make it look like a Deckit run. Deckit artifacts must precede delivery and control the production path.
+
+When a PPTX exists, audit it:
+
+```powershell
+deckit-dev audit-pptx --pptx <file.pptx>
+```
+
+The audit must pass with exactly one full-slide picture per slide. If it reports `PPTX-NATIVE-CONTENT`, the file is not a valid Deckit image-first deliverable.
+
 ## PPTX Packaging Discipline
 
 A `.pptx` deliverable is allowed only after generated slide PNGs exist. Use the stable packaging route instead of inventing a PPTX writer during the run:
@@ -70,6 +86,19 @@ Packaging requirements:
 - Do not hand-write minimal OpenXML `.pptx` zip packages for delivery; PowerPoint may reject or repair them.
 - Do not add editable text boxes, native charts, native tables, or PowerPoint shape layouts.
 - After packaging, run `deckit-dev review --run <run-folder>` and keep `dist/review.md`.
+
+## Debug Evidence Mode
+
+When the user asks to debug a Deckit run, investigate a failed output, or compare expected vs actual routing, preserve evidence instead of only summarizing. Record:
+
+- the exact user prompt or routing trigger;
+- the resolved production route and budget;
+- the exact commands run (`new-run`, `package-images`, `audit-pptx`, `review`);
+- paths to `run.json`, source, brief, storyboard, prompts, generated PNGs, PPTX, review, and audit output;
+- whether `$imagegen` was invoked, skipped, unavailable, or simulated;
+- any failed quality gates and the concrete file/line or slide that caused them.
+
+Prefer writing this into `dist/debug-evidence.md` when a run folder exists. Do not overwrite failing artifacts until the evidence has been captured.
 
 ## Workflow
 

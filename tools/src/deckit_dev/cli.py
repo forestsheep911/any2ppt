@@ -556,12 +556,110 @@ def _scan_native_pptx_scripts(run_dir: Path) -> list[tuple[str, str, str]]:
     return findings
 
 
+def _audit_pptx_container(pptx_path: Path, label: str | None = None) -> tuple[list[tuple[str, str, str]], list[str]]:
+    """Verify that a PPTX is an image-first container: exactly one picture per slide.
+
+    Returns (findings, report_lines). Findings use the same (severity, rule_id, message)
+    shape as review findings so the audit can be reused by `review`.
+    """
+    findings: list[tuple[str, str, str]] = []
+    report_lines: list[str] = []
+    display = label or str(pptx_path)
+
+    if not pptx_path.is_file():
+        return [("error", "PPTX-001", f"PPTX file not found: {display}")], [f"# PPTX Audit — {display}\n\nFile not found.\n"]
+
+    try:
+        from pptx import Presentation
+    except ImportError as exc:
+        raise RuntimeError("python-pptx is required for PPTX auditing.") from exc
+
+    try:
+        with zipfile.ZipFile(pptx_path) as package:
+            bad_member = package.testzip()
+            media = [name for name in package.namelist() if name.startswith("ppt/media/")]
+    except zipfile.BadZipFile:
+        return [("error", "PPTX-ZIP", f"{display} is not a valid ZIP/PPTX package")], [
+            f"# PPTX Audit — {display}\n\nInvalid ZIP/PPTX package.\n"
+        ]
+
+    if bad_member is not None:
+        findings.append(("error", "PPTX-ZIP-MEMBER", f"{display} failed ZIP integrity check at {bad_member}"))
+
+    try:
+        prs = Presentation(str(pptx_path))
+    except Exception as exc:
+        findings.append(("error", "PPTX-OPEN", f"{display} could not be opened by python-pptx: {exc}"))
+        return findings, [f"# PPTX Audit — {display}\n\nCould not open with python-pptx: {exc}\n"]
+
+    total_shapes = 0
+    type_counts: dict[str, int] = {}
+    slide_summaries: list[str] = []
+
+    for idx, slide in enumerate(prs.slides, start=1):
+        shape_types = [str(shape.shape_type) for shape in slide.shapes]
+        total_shapes += len(shape_types)
+        for shape_type in shape_types:
+            type_counts[shape_type] = type_counts.get(shape_type, 0) + 1
+
+        type_summary = ", ".join(f"{shape_type}: {count}" for shape_type, count in sorted({
+            shape_type: shape_types.count(shape_type) for shape_type in set(shape_types)
+        }.items()))
+        slide_summaries.append(f"- Slide {idx}: {len(shape_types)} shape(s) — {type_summary or 'none'}\n")
+
+        is_single_picture = len(slide.shapes) == 1 and shape_types and "PICTURE" in shape_types[0]
+        if not is_single_picture:
+            findings.append(
+                (
+                    "error",
+                    "PPTX-NATIVE-CONTENT",
+                    f"{display} slide {idx} has {len(shape_types)} shape(s) ({type_summary or 'none'}); expected exactly one full-slide picture and no native editable content",
+                )
+            )
+
+    report_lines.append(f"# PPTX Audit — {display}\n\n")
+    report_lines.append(f"- Slides: {len(prs.slides)}\n")
+    report_lines.append(f"- Media assets: {len(media)}\n")
+    report_lines.append(f"- Total slide shapes: {total_shapes}\n")
+    report_lines.append(f"- Findings: {sum(1 for sev, _, _ in findings if sev == 'error')} error(s), {sum(1 for sev, _, _ in findings if sev == 'warn')} warning(s)\n\n")
+    report_lines.append("## Shape Type Totals\n\n")
+    if type_counts:
+        for shape_type, count in sorted(type_counts.items()):
+            report_lines.append(f"- {shape_type}: {count}\n")
+    else:
+        report_lines.append("- none\n")
+    report_lines.append("\n## Slides\n\n")
+    report_lines.extend(slide_summaries)
+    if findings:
+        report_lines.append("\n## Findings\n\n")
+        for sev, rule_id, message in findings:
+            report_lines.append(f"- **{sev.upper()}** `{rule_id}` — {message}\n")
+    else:
+        report_lines.append("\nAll checks passed: this PPTX is a one-image-per-slide container.\n")
+
+    return findings, report_lines
+
+
+def _find_pptx_deliverables(run_dir: Path) -> list[Path]:
+    """Find likely PPTX deliverables in a run folder.
+
+    Search both `dist/` and the run root because failed/manual runs often place
+    deliverables at the root while still backfilling Deckit-like artifacts later.
+    Ignore PowerPoint lock files (`~$*.pptx`).
+    """
+    candidates: list[Path] = []
+    for folder in (run_dir / "dist", run_dir):
+        if folder.is_dir():
+            candidates.extend(p for p in folder.glob("*.pptx") if not p.name.startswith("~$"))
+    return sorted(set(candidates))
+
+
 def _scan_image_first_artifacts(run_dir: Path, storyboard_ids: list[str]) -> list[tuple[str, str, str]]:
     findings: list[tuple[str, str, str]] = []
     generated_dir = run_dir / "assets" / "generated-slides"
     generated_pngs = sorted(generated_dir.glob("*.png")) if generated_dir.is_dir() else []
     generated_ids = {p.stem for p in generated_pngs}
-    dist_pptx = sorted((run_dir / "dist").glob("*.pptx")) if (run_dir / "dist").is_dir() else []
+    dist_pptx = _find_pptx_deliverables(run_dir)
 
     if dist_pptx and not generated_pngs:
         pptx_names = ", ".join(p.name for p in dist_pptx)
@@ -582,6 +680,10 @@ def _scan_image_first_artifacts(run_dir: Path, storyboard_ids: list[str]) -> lis
                 f"dist contains PPTX deliverable(s) ({pptx_names}) before every storyboard slide has a generated PNG; missing: {missing}",
             )
         )
+
+    for pptx_path in dist_pptx:
+        audit_findings, _ = _audit_pptx_container(pptx_path, str(pptx_path.relative_to(run_dir)))
+        findings.extend(audit_findings)
 
     for sid in storyboard_ids:
         if generated_pngs and sid not in generated_ids:
@@ -668,18 +770,15 @@ def _package_images(run_dir: Path, out_path: Path | None) -> int:
 
     prs.save(str(out_path))
 
-    # Structural smoke checks: the file is a readable ZIP, re-opens through python-pptx, and has one picture per slide.
-    with zipfile.ZipFile(out_path) as package:
-        bad_member = package.testzip()
-    if bad_member is not None:
-        raise ValueError(f"packaged PPTX failed ZIP integrity check at {bad_member}")
+    audit_findings, _ = _audit_pptx_container(out_path)
+    audit_errors = [message for sev, _, message in audit_findings if sev == "error"]
+    if audit_errors:
+        raise ValueError("packaged PPTX failed image-first container audit: " + "; ".join(audit_errors))
 
     check = Presentation(str(out_path))
     if len(check.slides) != len(slide_ids):
         raise ValueError(f"packaged PPTX has {len(check.slides)} slide(s), expected {len(slide_ids)}")
     for idx, slide in enumerate(check.slides, start=1):
-        if len(slide.shapes) != 1:
-            raise ValueError(f"packaged PPTX slide {idx} has {len(slide.shapes)} shape(s), expected exactly 1 image")
         if not slide.has_notes_slide or not slide.notes_slide.notes_text_frame.text.strip():
             raise ValueError(f"packaged PPTX slide {idx} is missing speaker notes")
 
@@ -687,6 +786,16 @@ def _package_images(run_dir: Path, out_path: Path | None) -> int:
     print(f"slides packaged: {len(slide_ids)}")
     print("mode: image-first PNG container; no editable native PowerPoint slide content; speaker notes included")
     return 0
+
+
+def audit_pptx(pptx_path: Path) -> int:
+    pptx_path = pptx_path.resolve()
+    findings, report_lines = _audit_pptx_container(pptx_path)
+    print("".join(report_lines), end="")
+    counts = {"error": 0, "warn": 0}
+    for sev, _, _ in findings:
+        counts[sev] = counts.get(sev, 0) + 1
+    return 0 if counts["error"] == 0 else 1
 
 
 def review(run_dir: Path) -> int:
@@ -790,6 +899,12 @@ def main() -> int:
         help="Output PPTX path. Relative paths are resolved inside the run directory; default: dist/<run-name>.pptx.",
     )
 
+    audit_parser = subparsers.add_parser(
+        "audit-pptx",
+        help="Audit a PPTX for Deckit image-first compliance (exactly one full-slide picture per slide)",
+    )
+    audit_parser.add_argument("--pptx", type=Path, required=True, help="PPTX file to audit.")
+
     ingest_parser = subparsers.add_parser("ingest", help="Convert a PDF or URL into source/input.md (Markdown)")
     ingest_group = ingest_parser.add_mutually_exclusive_group(required=True)
     ingest_group.add_argument("--pdf", type=Path, help="Path to a .pdf file")
@@ -808,6 +923,8 @@ def main() -> int:
         return review(args.run)
     if args.command == "package-images":
         return _package_images(args.run, args.out)
+    if args.command == "audit-pptx":
+        return audit_pptx(args.pptx)
     if args.command == "ingest":
         from deckit_dev.ingest import ingest_pdf, ingest_url
 

@@ -165,6 +165,16 @@ uv run deckit-dev package-images --run "<workdir>\<run-name>"
 
 This command reads `work/storyboard.md`, requires a matching `assets/generated-slides/<slide-id>.png` for every slide, writes `dist/<run-name>.pptx`, adds PowerPoint speaker notes for every slide, and verifies that the file re-opens as a one-image-per-slide PPTX with notes. Do not hand-write minimal OpenXML `.pptx` zip packages for delivery; PowerPoint may reject or repair them.
 
+Audit any PPTX deliverable, especially when debugging a suspicious run:
+
+```powershell
+uv run deckit-dev audit-pptx --pptx "<workdir>\<run-name>\dist\<run-name>.pptx"
+```
+
+The audit must report exactly one picture per slide. If it finds text boxes, shapes, lines, charts, or tables, the file is native-PPTX and is not a valid Deckit image-first deliverable. Do not create a visually rich native PowerPoint deck and then backfill Deckit artifacts afterward; if generated PNGs do not exist yet, stop at the prompt pack.
+
+When debugging, preserve `dist/review.md`, `audit-pptx` output, exact commands, and paths to the source, brief, storyboard, prompts, generated PNGs, and PPTX. Prefer writing this trace to `<run-name>/dist/debug-evidence.md`.
+
 ## Step 6 — Quality Gate
 
 Run the executable quality gate:
