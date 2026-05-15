@@ -153,9 +153,25 @@ Inside Cursor, in `<workdir>`, ask the installed `deckit` plugin to produce the 
 
 For generated slides, use the prompt pack with the official `$imagegen` skill and save PNGs under `<run-name>/assets/generated-slides/`. If you later need a PPTX, package those already generated PNGs as full-slide images; do not switch to a native-PPTX assembly path.
 
+If the user says "make a PPT", "create a PowerPoint", "制作 PPT", or another ambiguous presentation request, Deckit treats that as an image-first slide request. A `.pptx` file is allowed only after slide PNGs exist, and only as a non-editable container with one generated full-slide image per page. If the user explicitly requires editable PowerPoint text boxes, shapes, or charts, Deckit should state that editable native-PPTX production is not supported by the active route rather than switching to a native PowerPoint workflow.
+
+Use the stable packaging command for PPTX containers:
+
+```powershell
+uv run deckit-dev package-images --run "<workdir>\<run-name>"
+```
+
+This command reads `work/storyboard.md`, requires a matching `assets/generated-slides/<slide-id>.png` for every slide, writes `dist/<run-name>.pptx`, and verifies that the file re-opens as a one-image-per-slide PPTX. Do not hand-write minimal OpenXML `.pptx` zip packages for delivery; PowerPoint may reject or repair them.
+
 ## Step 6 — Quality Gate
 
-Until the `deckit-dev review` subcommand lands (Week 2 second deliverable), run the [critique checklist](../plugins/deckit/references/critique-checklist.md) by hand and write findings to `<run-name>/dist/review.md`.
+Run the executable quality gate:
+
+```powershell
+uv run deckit-dev review --run "<workdir>\<run-name>"
+```
+
+The report is written to `<run-name>/dist/review.md`. It checks the brief, storyboard, prompt mapping, image-first artifact discipline, and native-PPTX firewall rules. If the development tool is not available, run the [critique checklist](../plugins/deckit/references/critique-checklist.md) by hand and write findings to `<run-name>/dist/review.md`.
 
 ## Findings From the Validation Walk-through
 

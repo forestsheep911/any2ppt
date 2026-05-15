@@ -1,7 +1,7 @@
 {
   "name": "deckit",
-  "version": "0.3.2",
-  "description": "An image-first deck workflow for turning text, PDF, or URL source material into deck briefs, storyboards, image-generation prompts, and generated slide images through the official $imagegen skill.",
+  "version": "0.3.3",
+  "description": "An image-first deck workflow for turning text, PDF, or URL source material into deck briefs, storyboards, image-generation prompts, and generated slide images through the official $imagegen skill. PPTX is only an optional container for generated slide images, never a native production route.",
   "author": {
     "name": "fores"
   },
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "Deckit",
     "shortDescription": "Turn source material into image-first slide prompts and generated slide images.",
-    "longDescription": "Deckit coordinates an image-first deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, and run a rule-based review before delivery. Five specialist skills: deck-producer, document-ingestor, story-architect, slide-storyboarder, visual-director. V0.3 uses a single $imagegen route to prevent accidental local-rendered or PowerPoint-native output, and should not delegate active runs to installed native-PPTX skills such as Codex Presentations or Anthropic pptx.",
+    "longDescription": "Deckit coordinates an image-first deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, and run a rule-based review before delivery. Ambiguous requests such as \"make a PPT\" or \"制作 PPT\" are handled as image-first slide generation. Deckit does not create editable native PowerPoint decks; a .pptx, if needed, is only a non-editable container for generated full-slide images.",
     "developerName": "fores",
     "category": "Productivity",
     "capabilities": [
@@ -27,10 +27,10 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Turn this transcript into a deck storyboard.",
+      "Turn this transcript into an image-first deck storyboard.",
       "Create slide prompts and generate images from this outline.",
       "Ingest this PDF (or URL) and start a deck.",
-      "Generate image-first slides with image generation."
+      "Make a PPT as image-first slides with generated full-slide images."
     ],
     "brandColor": "#2563EB"
   }

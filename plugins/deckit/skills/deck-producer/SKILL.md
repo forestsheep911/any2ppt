@@ -9,6 +9,37 @@ Act as the production owner for Deckit deck work. Optimize for a usable image-fi
 
 Deckit v0.3 has one active production route: **image-first with actual image generation**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
 
+## Native PPTX Firewall
+
+PPTX is allowed only as a delivery container, never as a production method.
+
+Never satisfy ambiguous requests such as "make a PPT", "create a PowerPoint", "make slides", "produce a presentation", "制作 PPT", "做 PPT", "帮我做个演示文稿", or "生成 PowerPoint" by creating editable native PowerPoint shapes, text boxes, charts, or layouts. Interpret ambiguous presentation requests as Deckit's image-first route:
+
+> Create an image-first presentation: brief, storyboard, image prompts, and generated full-slide images.
+
+Do not ask the user to choose between image-first and native-PPTX. Native-PPTX is not an active option. If the user asks for a `.pptx` file, treat it only as an optional package after `$imagegen` has produced slide PNGs; the package must contain one generated full-slide image per page and must not contain native editable slide construction.
+
+If the user explicitly requires editable PowerPoint objects, state the limitation and do not switch routes:
+
+> Deckit does not produce editable native-PPTX decks in the active route. I can continue with image-first full-slide images, optionally packaged into a non-editable `.pptx` container.
+
+## PPTX Packaging Discipline
+
+A `.pptx` deliverable is allowed only after generated slide PNGs exist. Use the stable packaging route instead of inventing a PPTX writer during the run:
+
+```powershell
+deckit-dev package-images --run <run-folder>
+```
+
+Packaging requirements:
+
+- Source images must be `assets/generated-slides/<slide-id>.png`, one for every storyboard slide.
+- The package must contain one slide per storyboard slide, in storyboard order.
+- Each PPTX slide must contain exactly one generated full-slide image sized to the slide canvas.
+- Do not hand-write minimal OpenXML `.pptx` zip packages for delivery; PowerPoint may reject or repair them.
+- Do not add editable text boxes, native charts, native tables, or PowerPoint shape layouts.
+- After packaging, run `deckit-dev review --run <run-folder>` and keep `dist/review.md`.
+
 ## Workflow
 
 1. Identify the user's source material and desired output. If the source is a `.pdf` or an `http(s)` URL, route through `document-ingestor` first to produce `source/input.md`.

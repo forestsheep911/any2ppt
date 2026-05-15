@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 import shutil
+import zipfile
 from pathlib import Path
 
 import yaml
@@ -239,6 +240,31 @@ SLIDE_COUNT_BANDS = {
     "premium": (8, 14),
 }
 
+NATIVE_PPTX_SCRIPT_PATTERNS: tuple[tuple[str, str], ...] = (
+    (r"^\s*(from|import)\s+pptx\b", "imports python-pptx"),
+    (r"\bPresentation\s*\(", "constructs a PowerPoint presentation"),
+    (r"\bslide\.shapes\b", "uses native PowerPoint slide shapes"),
+    (r"\bshapes\.add_(textbox|chart|table|shape|connector)\b", "adds native PowerPoint objects"),
+    (r"\btext_frame\b", "edits native PowerPoint text frames"),
+    (r"\bMSO_SHAPE\b|\bXL_CHART_TYPE\b", "uses native PowerPoint shape/chart constants"),
+)
+
+FORBIDDEN_PROMPT_PATTERNS: tuple[tuple[str, str], ...] = (
+    (r"\bnative[- ]pptx\b", "asks for native-PPTX output"),
+    (r"\bpptx[- ]native\b", "asks for PPTX-native output"),
+    (r"\beditable\s+(powerpoint|pptx|ppt)\b", "asks for editable PowerPoint output"),
+    (r"\b(powerpoint|pptx|ppt)\s+(text boxes|shapes|charts|layouts)\b", "asks for native PowerPoint objects"),
+    (r"\bshape[- ]by[- ]shape\b", "asks for shape-by-shape slide construction"),
+    (r"\bpython[- ]pptx\b", "mentions python-pptx in a production artifact"),
+    (r"\bhybrid\s+mode\b", "asks for disabled hybrid mode"),
+    (r"\buse\s+(codex\s+)?presentations\b", "delegates to a native presentation tool"),
+)
+
+NATIVE_PPTX_NEGATION_PATTERN = re.compile(
+    r"\b(no|not|never|without|forbidden|disabled|unsupported|does not|do not|is not|must not)\b|不支持|不要|不能|禁止|不是",
+    re.IGNORECASE,
+)
+
 
 def _scan_brief(brief_path: Path) -> list[tuple[str, str, str]]:
     findings: list[tuple[str, str, str]] = []
@@ -384,6 +410,71 @@ def _scan_prompts(run_dir: Path, storyboard_ids: list[str]) -> list[tuple[str, s
     return findings
 
 
+def _scan_native_pptx_language(run_dir: Path) -> list[tuple[str, str, str]]:
+    """Reject production artifacts that steer an image-first run back to native-PPTX."""
+    findings: list[tuple[str, str, str]] = []
+    candidate_files: list[Path] = []
+
+    storyboard_path = run_dir / "work" / "storyboard.md"
+    if storyboard_path.is_file():
+        candidate_files.append(storyboard_path)
+
+    prompts_dir = run_dir / "prompts"
+    if prompts_dir.is_dir():
+        candidate_files.extend(sorted(prompts_dir.glob("*.md")))
+
+    for path in candidate_files:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            if NATIVE_PPTX_NEGATION_PATTERN.search(line):
+                continue
+            for pattern, reason in FORBIDDEN_PROMPT_PATTERNS:
+                if not re.search(pattern, line, re.IGNORECASE):
+                    continue
+                findings.append(
+                    (
+                        "error",
+                        "IMG-FIRST-NATIVE-PPTX-LANGUAGE",
+                        f"{path.relative_to(run_dir)}:{line_number} {reason}; Deckit prompts/storyboards must stay image-first",
+                    )
+                )
+                break
+    return findings
+
+
+def _scan_native_pptx_scripts(run_dir: Path) -> list[tuple[str, str, str]]:
+    """Reject run-local scripts that look like native PowerPoint assembly."""
+    findings: list[tuple[str, str, str]] = []
+    scripts_dir = run_dir / "scripts"
+    if not scripts_dir.is_dir():
+        return findings
+
+    script_suffixes = {".py", ".js", ".ts", ".mjs", ".cjs"}
+    for script_path in sorted(p for p in scripts_dir.rglob("*") if p.is_file() and p.suffix.lower() in script_suffixes):
+        try:
+            text = script_path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+
+        matched_reasons = [
+            reason
+            for pattern, reason in NATIVE_PPTX_SCRIPT_PATTERNS
+            if re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        ]
+        if matched_reasons:
+            findings.append(
+                (
+                    "error",
+                    "IMG-FIRST-NATIVE-PPTX-SCRIPT",
+                    f"{script_path.relative_to(run_dir)} {', '.join(matched_reasons)}; PPTX is only a container after $imagegen PNGs exist, never a native production route",
+                )
+            )
+    return findings
+
+
 def _scan_image_first_artifacts(run_dir: Path, storyboard_ids: list[str]) -> list[tuple[str, str, str]]:
     findings: list[tuple[str, str, str]] = []
     generated_dir = run_dir / "assets" / "generated-slides"
@@ -398,6 +489,16 @@ def _scan_image_first_artifacts(run_dir: Path, storyboard_ids: list[str]) -> lis
                 "error",
                 "IMG-FIRST-PPTX-WITHOUT-GENERATED-SLIDES",
                 f"dist contains PPTX deliverable(s) ({pptx_names}) but assets/generated-slides has no PNGs from $imagegen",
+            )
+        )
+    elif dist_pptx and storyboard_ids and set(storyboard_ids) - generated_ids:
+        missing = ", ".join(sorted(set(storyboard_ids) - generated_ids))
+        pptx_names = ", ".join(p.name for p in dist_pptx)
+        findings.append(
+            (
+                "error",
+                "IMG-FIRST-PPTX-BEFORE-COMPLETE-IMAGES",
+                f"dist contains PPTX deliverable(s) ({pptx_names}) before every storyboard slide has a generated PNG; missing: {missing}",
             )
         )
 
@@ -419,22 +520,85 @@ def _scan_image_first_artifacts(run_dir: Path, storyboard_ids: list[str]) -> lis
             )
         )
 
-    scripts_dir = run_dir / "scripts"
-    if scripts_dir.is_dir():
-        for script_path in sorted(scripts_dir.glob("*.py")):
-            try:
-                text = script_path.read_text(encoding="utf-8")
-            except UnicodeDecodeError:
-                continue
-            if re.search(r"^\s*(from|import)\s+pptx\b", text, re.MULTILINE):
-                findings.append(
-                    (
-                        "error",
-                        "IMG-FIRST-NATIVE-PPTX-SCRIPT",
-                        f"{script_path.relative_to(run_dir)} imports python-pptx; image-first runs must use $imagegen before optional PNG packaging",
-                    )
-                )
+    findings.extend(_scan_native_pptx_scripts(run_dir))
+    findings.extend(_scan_native_pptx_language(run_dir))
     return findings
+
+
+def _package_images(run_dir: Path, out_path: Path | None) -> int:
+    """Package generated slide PNGs into a non-editable image-only PPTX container."""
+    run_dir = run_dir.resolve()
+    if not run_dir.is_dir():
+        raise NotADirectoryError(f"run directory does not exist: {run_dir}")
+
+    slide_blocks, sb_findings = _parse_storyboard(run_dir / "work" / "storyboard.md")
+    errors = [finding for finding in sb_findings if finding[0] == "error"]
+    if errors:
+        detail = "; ".join(message for _, _, message in errors)
+        raise ValueError(f"cannot package images because storyboard is invalid: {detail}")
+
+    slide_ids = [slide_id for slide_id, _ in slide_blocks]
+    if not slide_ids:
+        raise ValueError("cannot package images because storyboard contains no slides")
+
+    generated_dir = run_dir / "assets" / "generated-slides"
+    missing = [slide_id for slide_id in slide_ids if not (generated_dir / f"{slide_id}.png").is_file()]
+    if missing:
+        raise FileNotFoundError(
+            "cannot package PPTX before every storyboard slide has a generated PNG. Missing: "
+            + ", ".join(f"assets/generated-slides/{slide_id}.png" for slide_id in missing)
+        )
+
+    if out_path is None:
+        out_path = run_dir / "dist" / f"{run_dir.name}.pptx"
+    elif not out_path.is_absolute():
+        out_path = (run_dir / out_path).resolve()
+    else:
+        out_path = out_path.resolve()
+
+    dist_dir = run_dir / "dist"
+    dist_dir.mkdir(parents=True, exist_ok=True)
+    _ensure_inside(dist_dir, out_path)
+
+    try:
+        from pptx import Presentation
+        from pptx.util import Inches
+    except ImportError as exc:
+        raise RuntimeError(
+            "python-pptx is required for stable PPTX container packaging. "
+            "Install the dev tools with their dependencies, then rerun deckit-dev package-images."
+        ) from exc
+
+    prs = Presentation()
+    prs.slide_width = Inches(13.333333)
+    prs.slide_height = Inches(7.5)
+    blank_layout = prs.slide_layouts[6]
+
+    for slide_id in slide_ids:
+        slide = prs.slides.add_slide(blank_layout)
+        image_path = generated_dir / f"{slide_id}.png"
+        # Packaging discipline: one generated full-slide image per slide; no editable text boxes/charts/native layouts.
+        slide.shapes.add_picture(str(image_path), 0, 0, width=prs.slide_width, height=prs.slide_height)
+
+    prs.save(str(out_path))
+
+    # Structural smoke checks: the file is a readable ZIP, re-opens through python-pptx, and has one picture per slide.
+    with zipfile.ZipFile(out_path) as package:
+        bad_member = package.testzip()
+    if bad_member is not None:
+        raise ValueError(f"packaged PPTX failed ZIP integrity check at {bad_member}")
+
+    check = Presentation(str(out_path))
+    if len(check.slides) != len(slide_ids):
+        raise ValueError(f"packaged PPTX has {len(check.slides)} slide(s), expected {len(slide_ids)}")
+    for idx, slide in enumerate(check.slides, start=1):
+        if len(slide.shapes) != 1:
+            raise ValueError(f"packaged PPTX slide {idx} has {len(slide.shapes)} shape(s), expected exactly 1 image")
+
+    print(f"wrote: {out_path}")
+    print(f"slides packaged: {len(slide_ids)}")
+    print("mode: image-first PNG container; no editable native PowerPoint content")
+    return 0
 
 
 def review(run_dir: Path) -> int:
@@ -516,11 +680,27 @@ def main() -> int:
     new_run_parser.add_argument("--name", help="Run name. Defaults to the source filename stem (or URL host+path).")
     new_run_parser.add_argument("--runs-dir", type=Path, default=DEFAULT_RUNS_DIR)
     new_run_parser.add_argument("--force", action="store_true", help="Reuse an existing run directory and replace source copy")
-    new_run_parser.add_argument("--mode", choices=PRODUCTION_MODES, default="image-first", help="Production mode. V0.3 supports image-first only.")
+    new_run_parser.add_argument(
+        "--mode",
+        choices=PRODUCTION_MODES,
+        default="image-first",
+        help="Deprecated compatibility flag. Deckit always uses image-first; no other production modes are valid.",
+    )
     new_run_parser.add_argument("--budget", choices=("quick", "balanced", "premium"), help="Budget mode (recorded in run.json).")
 
     review_parser = subparsers.add_parser("review", help="Run rule-based quality checks on a run folder and write dist/review.md")
     review_parser.add_argument("--run", type=Path, required=True, help="Path to the run directory to review.")
+
+    package_parser = subparsers.add_parser(
+        "package-images",
+        help="Package assets/generated-slides/*.png into a non-editable image-only PPTX container",
+    )
+    package_parser.add_argument("--run", type=Path, required=True, help="Path to the run directory to package.")
+    package_parser.add_argument(
+        "--out",
+        type=Path,
+        help="Output PPTX path. Relative paths are resolved inside the run directory; default: dist/<run-name>.pptx.",
+    )
 
     ingest_parser = subparsers.add_parser("ingest", help="Convert a PDF or URL into source/input.md (Markdown)")
     ingest_group = ingest_parser.add_mutually_exclusive_group(required=True)
@@ -538,6 +718,8 @@ def main() -> int:
         return new_run(args.source, args.name, args.runs_dir, args.force, args.mode, args.budget)
     if args.command == "review":
         return review(args.run)
+    if args.command == "package-images":
+        return _package_images(args.run, args.out)
     if args.command == "ingest":
         from deckit_dev.ingest import ingest_pdf, ingest_url
 
