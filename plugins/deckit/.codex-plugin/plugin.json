@@ -1,6 +1,6 @@
 {
   "name": "deckit",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "An image-first deck workflow for turning text, PDF, or URL source material into deck briefs, storyboards, image-generation prompts, and generated slide images through the official $imagegen skill. PPTX is only an optional container for generated slide images, never a native production route.",
   "author": {
     "name": "fores"
@@ -29,8 +29,6 @@
     "defaultPrompt": [
       "Turn this transcript into an image-first deck storyboard.",
       "介绍一下 F-16 战斗机，做成 image-first deck.",
-      "Create slide prompts and generate images from this outline.",
-      "Ingest this PDF (or URL) and start a deck.",
       "Make a PPT as image-first slides with generated full-slide images."
     ],
     "brandColor": "#2563EB"
