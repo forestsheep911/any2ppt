@@ -17,7 +17,7 @@ Write a storyboard, usually at `work/storyboard.md`, where each slide includes:
 - Core claim.
 - 2-4 support points.
 - Recommended slide archetype.
-- Presenter intent or notes when useful.
+- Speaker notes for the PowerPoint notes pane on every slide.
 
 Use `../../references/slide-archetypes.md` when choosing slide types.
 
@@ -38,7 +38,8 @@ Examples: `00_cover`, `03_production_team`, `07_closing`.
 - Write titles that can be spoken aloud by a presenter, and keep titles under 80 characters (the `deckit-dev review` tool warns above this).
 - Avoid repetitive slide structures unless the repetition has a purpose.
 - Keep support points short enough to become slide text.
-- Include transitions when the deck's logic could feel abrupt.
+- Add `- **Speaker notes**:` to every slide. Write this as presenter-facing talk-track guidance, not visible slide copy: what to say first, the core point to emphasize, how to use the support points, and any transition into the next slide.
+- Include transitions in speaker notes when the deck's logic could feel abrupt.
 - Do not write visual descriptions, palette choices, or image prompts; that is the job of `visual-director`.
 
 ## Slide Count Bands

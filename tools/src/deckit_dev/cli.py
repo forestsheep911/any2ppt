@@ -313,6 +313,82 @@ def _extract_field_value(body: str, name: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+def _extract_markdown_field(body: str, names: tuple[str, ...]) -> str:
+    """Extract a storyboard bullet field, including optional indented continuation lines."""
+    names_pattern = "|".join(re.escape(name) for name in names)
+    pattern = rf"^-\s+\*\*(?:{names_pattern})\*\*:\s*(.*)$"
+    match = re.search(pattern, body, re.MULTILINE | re.IGNORECASE)
+    if not match:
+        return ""
+
+    lines = [match.group(1).strip()]
+    body_lines = body.splitlines()
+    start_line = body[: match.start()].count("\n")
+    for line in body_lines[start_line + 1 :]:
+        if re.match(r"^-\s+\*\*[^*]+\*\*:", line):
+            break
+        if line.strip() == "":
+            if lines and lines[-1] != "":
+                lines.append("")
+            continue
+        if line.startswith((" ", "\t")):
+            lines.append(line.strip())
+            continue
+        break
+    return "\n".join(line for line in lines).strip()
+
+
+def _extract_support_points(body: str) -> list[str]:
+    sp_match = re.search(
+        r"\*\*support points?\*\*[^\n]*\n((?:[ \t]*[-*][ \t]+[^\n]*\n?)+)",
+        body,
+        re.IGNORECASE,
+    )
+    if not sp_match:
+        return []
+    return [
+        re.sub(r"^[ \t]*[-*][ \t]+", "", line).strip()
+        for line in sp_match.group(1).splitlines()
+        if re.match(r"^[ \t]*[-*][ \t]+", line)
+    ]
+
+
+def _build_speaker_notes(slide_id: str, body: str) -> str:
+    """Build PowerPoint speaker notes from storyboard speaker guidance.
+
+    Prefer explicit storyboard notes when present. For older storyboards that only
+    contain Presenter intent, synthesize a concise talk track from existing fields
+    so every packaged slide still has usable presenter guidance.
+    """
+    explicit_notes = _extract_markdown_field(body, ("Speaker notes", "Presenter notes", "Notes"))
+    if explicit_notes:
+        return explicit_notes
+
+    title = _extract_field_value(body, "Title")
+    primary_job = _extract_field_value(body, "Primary job")
+    core_claim = _extract_field_value(body, "Core claim")
+    presenter_intent = _extract_field_value(body, "Presenter intent")
+    support_points = _extract_support_points(body)
+
+    lines: list[str] = []
+    if title:
+        lines.append(f"Slide: {title}")
+    else:
+        lines.append(f"Slide: {slide_id}")
+
+    if presenter_intent:
+        lines.extend(["", f"Presenter cue: {presenter_intent}"])
+    if core_claim:
+        lines.extend(["", f"Core message: {core_claim}"])
+    if support_points:
+        lines.extend(["", "Talk track:"])
+        lines.extend(f"- {point}" for point in support_points)
+    if primary_job:
+        lines.extend(["", f"Close / transition goal: {primary_job}"])
+
+    return "\n".join(lines).strip()
+
+
 def _normalize_archetype(value: str) -> str:
     """Strip parenthetical clarifications and lowercase. 'Thesis (four pillars)' -> 'thesis'."""
     cleaned = re.sub(r"\([^)]*\)", "", value).strip().lower()
@@ -330,6 +406,15 @@ def _scan_slide(slide_id: str, body: str) -> list[tuple[str, str, str]]:
     ):
         if token not in body_lower:
             findings.append(("warn", rule_id, f"slide {slide_id}: missing '{label}' field"))
+
+    if not any(token in body_lower for token in ("speaker notes", "presenter notes", "presenter intent")):
+        findings.append(
+            (
+                "warn",
+                "SLIDE-SPEAKER-NOTES",
+                f"slide {slide_id}: missing presenter guidance ('Speaker notes' or 'Presenter intent')",
+            )
+        )
 
     title_value = _extract_field_value(body, "Title")
     if title_value and len(title_value) > TITLE_LENGTH_MAX:
@@ -352,13 +437,9 @@ def _scan_slide(slide_id: str, body: str) -> list[tuple[str, str, str]]:
             )
         )
 
-    sp_match = re.search(
-        r"\*\*support points?\*\*[^\n]*\n((?:[ \t]*[-*][ \t]+[^\n]*\n)+)",
-        body,
-        re.IGNORECASE,
-    )
-    if sp_match:
-        bullets = re.findall(r"^[ \t]*[-*][ \t]+", sp_match.group(1), re.MULTILINE)
+    support_points = _extract_support_points(body)
+    if support_points:
+        bullets = support_points
         band_key = archetype_norm if archetype_norm in SUPPORT_COUNT_BANDS else None
         band = SUPPORT_COUNT_BANDS.get(band_key, SUPPORT_COUNT_DEFAULT) if band_key is not None else SUPPORT_COUNT_DEFAULT
         if band is None:
@@ -574,11 +655,16 @@ def _package_images(run_dir: Path, out_path: Path | None) -> int:
     prs.slide_height = Inches(7.5)
     blank_layout = prs.slide_layouts[6]
 
+    notes_by_slide_id = {slide_id: _build_speaker_notes(slide_id, body) for slide_id, body in slide_blocks}
+
     for slide_id in slide_ids:
         slide = prs.slides.add_slide(blank_layout)
         image_path = generated_dir / f"{slide_id}.png"
         # Packaging discipline: one generated full-slide image per slide; no editable text boxes/charts/native layouts.
         slide.shapes.add_picture(str(image_path), 0, 0, width=prs.slide_width, height=prs.slide_height)
+        # Add PowerPoint speaker notes from the storyboard so presenters have a talk track
+        # without changing the image-first, non-editable slide canvas.
+        slide.notes_slide.notes_text_frame.text = notes_by_slide_id[slide_id]
 
     prs.save(str(out_path))
 
@@ -594,10 +680,12 @@ def _package_images(run_dir: Path, out_path: Path | None) -> int:
     for idx, slide in enumerate(check.slides, start=1):
         if len(slide.shapes) != 1:
             raise ValueError(f"packaged PPTX slide {idx} has {len(slide.shapes)} shape(s), expected exactly 1 image")
+        if not slide.has_notes_slide or not slide.notes_slide.notes_text_frame.text.strip():
+            raise ValueError(f"packaged PPTX slide {idx} is missing speaker notes")
 
     print(f"wrote: {out_path}")
     print(f"slides packaged: {len(slide_ids)}")
-    print("mode: image-first PNG container; no editable native PowerPoint content")
+    print("mode: image-first PNG container; no editable native PowerPoint slide content; speaker notes included")
     return 0
 
 

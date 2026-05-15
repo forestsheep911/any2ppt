@@ -9,6 +9,36 @@ Act as the production owner for Deckit deck work. Optimize for a usable image-fi
 
 Deckit v0.3 has one active production route: **image-first with actual image generation**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
 
+## Invocation Default
+
+When the user explicitly invokes Deckit (`@deckit`, "use Deckit", "用 Deckit", or selecting the Deckit plugin), assume they want Deckit to produce presentation artifacts, not a plain prose answer.
+
+Do not respond with "you have not asked for slides yet" when Deckit was explicitly invoked. If the user gives only a topic, turn that topic into a deck seed and start the image-first workflow.
+
+Treat these as deck-production intents when Deckit is invoked:
+
+- "介绍一下..."
+- "讲讲..."
+- "分析..."
+- "总结..."
+- "整理..."
+- "做一下..."
+- "explain..."
+- "introduce..."
+- "summarize..."
+- "analyze..."
+- "brief me on..."
+
+Examples:
+
+- `@deckit 介绍一下 F-16 战斗机` → create an F-16 image-first deck workflow.
+- `@deckit summarize this article` → create a deck brief and storyboard from the article.
+- `@deckit 讲讲普卡拉战斗机` → create a topic-source deck run.
+
+Minimum default output for a topic-only invocation is a deck brief, storyboard, and image prompt pack. If `$imagegen` is available and the user asks for generated slides or a full deck, continue to slide image generation. If the user asks for `.pptx`, generate slide images first, then use the stable packaging route.
+
+Exceptions: answer directly instead of starting a deck run when the user asks what Deckit can do, asks to install/debug/inspect/review Deckit, explicitly requests text-only output, or explicitly says not to create slides/deck artifacts.
+
 ## Native PPTX Firewall
 
 PPTX is allowed only as a delivery container, never as a production method.
@@ -36,6 +66,7 @@ Packaging requirements:
 - Source images must be `assets/generated-slides/<slide-id>.png`, one for every storyboard slide.
 - The package must contain one slide per storyboard slide, in storyboard order.
 - Each PPTX slide must contain exactly one generated full-slide image sized to the slide canvas.
+- Each PPTX slide must include speaker notes in PowerPoint's notes pane, sourced from `Speaker notes` / `Presenter notes` / `Presenter intent` in `work/storyboard.md` or synthesized from the slide's claim and support points.
 - Do not hand-write minimal OpenXML `.pptx` zip packages for delivery; PowerPoint may reject or repair them.
 - Do not add editable text boxes, native charts, native tables, or PowerPoint shape layouts.
 - After packaging, run `deckit-dev review --run <run-folder>` and keep `dist/review.md`.

@@ -143,7 +143,7 @@ Responsibilities:
 - Write slide titles and core claims.
 - Choose 2-4 support points per slide.
 - Recommend slide archetypes.
-- Add speaker intent or presenter notes when useful.
+- Add speaker notes for every slide so packaged PowerPoint decks include presenter guidance in the notes pane.
 
 Output:
 

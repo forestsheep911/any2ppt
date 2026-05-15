@@ -1,5 +1,20 @@
 # Deckit Workflow
 
+## Explicit Invocation Default
+
+When Deckit is explicitly invoked (`@deckit`, "use Deckit", "用 Deckit", or plugin selection), treat the request as a deck-production request by default. Do not answer with plain explanatory prose just because the user did not say "slides" or "PPT".
+
+Topic-only examples such as `@deckit 介绍一下 F-16 战斗机`, `@deckit 讲讲普卡拉战斗机`, or `@deckit explain quantum computing` should start a Deckit workflow:
+
+1. Treat the topic as the source seed.
+2. Infer a reasonable audience and goal.
+3. Create `work/deck-brief.md` with assumptions and fact-check needs.
+4. Create `work/storyboard.md`.
+5. Create `prompts/README.md` and `prompts/<slide-id>.md`.
+6. Continue to `$imagegen` and optional PPTX packaging when requested or when the run scope calls for complete slide output.
+
+Exceptions: answer directly when the user asks about Deckit's capabilities, installation, debugging, inspection, review output, or explicitly requests text-only output/no deck artifacts.
+
 ## Image-First Flow
 
 Deckit v0.3 has one active route: `image-first`.

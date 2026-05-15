@@ -1,6 +1,6 @@
 {
   "name": "deckit",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "An image-first deck workflow for turning text, PDF, or URL source material into deck briefs, storyboards, image-generation prompts, and generated slide images through the official $imagegen skill. PPTX is only an optional container for generated slide images, never a native production route.",
   "author": {
     "name": "fores"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "Deckit",
     "shortDescription": "Turn source material into image-first slide prompts and generated slide images.",
-    "longDescription": "Deckit coordinates an image-first deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, and run a rule-based review before delivery. Ambiguous requests such as \"make a PPT\" or \"制作 PPT\" are handled as image-first slide generation. Deckit does not create editable native PowerPoint decks; a .pptx, if needed, is only a non-editable container for generated full-slide images.",
+    "longDescription": "Deckit coordinates an image-first deck production workflow: ingest text / PDF / URL, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, and run a rule-based review before delivery. When explicitly invoked, Deckit treats topic-only requests such as \"介绍一下 F-16\" as deck-production requests, not plain prose answers. Ambiguous requests such as \"make a PPT\" or \"制作 PPT\" are handled as image-first slide generation. Deckit does not create editable native PowerPoint decks; a .pptx, if needed, is only a non-editable container for generated full-slide images.",
     "developerName": "fores",
     "category": "Productivity",
     "capabilities": [
@@ -28,6 +28,7 @@
     ],
     "defaultPrompt": [
       "Turn this transcript into an image-first deck storyboard.",
+      "介绍一下 F-16 战斗机，做成 image-first deck.",
       "Create slide prompts and generate images from this outline.",
       "Ingest this PDF (or URL) and start a deck.",
       "Make a PPT as image-first slides with generated full-slide images."

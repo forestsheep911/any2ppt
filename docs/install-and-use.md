@@ -151,6 +151,8 @@ Inside Cursor, in `<workdir>`, ask the installed `deckit` plugin to produce the 
 2. `slide-storyboarder` to produce `<run-name>/work/storyboard.md`.
 3. `visual-director` to produce `<run-name>/prompts/README.md` and `<run-name>/prompts/<slide-id>.md`.
 
+If you explicitly invoke Deckit, topic-only requests are deck requests. For example, `@deckit 介绍一下 F-16 战斗机` should start a Deckit image-first workflow and produce deck artifacts; it should not stop at a plain prose introduction merely because the words "PPT" or "slides" were not present.
+
 For generated slides, use the prompt pack with the official `$imagegen` skill and save PNGs under `<run-name>/assets/generated-slides/`. If you later need a PPTX, package those already generated PNGs as full-slide images; do not switch to a native-PPTX assembly path.
 
 If the user says "make a PPT", "create a PowerPoint", "制作 PPT", or another ambiguous presentation request, Deckit treats that as an image-first slide request. A `.pptx` file is allowed only after slide PNGs exist, and only as a non-editable container with one generated full-slide image per page. If the user explicitly requires editable PowerPoint text boxes, shapes, or charts, Deckit should state that editable native-PPTX production is not supported by the active route rather than switching to a native PowerPoint workflow.
@@ -161,7 +163,7 @@ Use the stable packaging command for PPTX containers:
 uv run deckit-dev package-images --run "<workdir>\<run-name>"
 ```
 
-This command reads `work/storyboard.md`, requires a matching `assets/generated-slides/<slide-id>.png` for every slide, writes `dist/<run-name>.pptx`, and verifies that the file re-opens as a one-image-per-slide PPTX. Do not hand-write minimal OpenXML `.pptx` zip packages for delivery; PowerPoint may reject or repair them.
+This command reads `work/storyboard.md`, requires a matching `assets/generated-slides/<slide-id>.png` for every slide, writes `dist/<run-name>.pptx`, adds PowerPoint speaker notes for every slide, and verifies that the file re-opens as a one-image-per-slide PPTX with notes. Do not hand-write minimal OpenXML `.pptx` zip packages for delivery; PowerPoint may reject or repair them.
 
 ## Step 6 — Quality Gate
 
