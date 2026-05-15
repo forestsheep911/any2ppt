@@ -1,17 +1,17 @@
 ---
 name: deck-producer
-description: Main Deckit coordinator for image-first presentation production. Use when Codex needs to turn source material, transcripts, notes, or outlines into a deck workflow; choose quick, balanced, or premium scope; coordinate story architecture, slide storyboarding, visual direction, the official $imagegen skill, and delivery artifacts.
+description: Main Deckit coordinator for end-to-end image-first deck production. Use whenever Deckit is explicitly invoked, including topic-only prompts like "@deckit 介绍一下 F-16", even if the user did not say slides/PPT. Runs brief, storyboard, visual prompts, official $imagegen slide generation, review, and PPTX image-container packaging unless the user explicitly asks for text-only/no deck artifacts or a required tool is unavailable.
 ---
 
 # Deck Producer
 
 Act as the production owner for Deckit deck work. Optimize for a usable image-first presentation under real constraints: source quality, token budget, time, image generation cost, and requested output.
 
-Deckit v0.3 has one active production route: **image-first with actual image generation**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
+Deckit v0.3 has one active production route: **image-first with actual image generation, followed by review and PPTX image-container packaging**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
 
 ## Invocation Default
 
-When the user explicitly invokes Deckit (`@deckit`, "use Deckit", "用 Deckit", or selecting the Deckit plugin), assume they want Deckit to produce presentation artifacts, not a plain prose answer.
+When the user explicitly invokes Deckit (`@deckit`, "use Deckit", "用 Deckit", or selecting the Deckit plugin), assume they want Deckit to produce a complete presentation deliverable, not a plain prose answer.
 
 Do not respond with "you have not asked for slides yet" when Deckit was explicitly invoked. If the user gives only a topic, turn that topic into a deck seed and start the image-first workflow.
 
@@ -31,13 +31,35 @@ Treat these as deck-production intents when Deckit is invoked:
 
 Examples:
 
-- `@deckit 介绍一下 F-16 战斗机` → create an F-16 image-first deck workflow.
-- `@deckit summarize this article` → create a deck brief and storyboard from the article.
-- `@deckit 讲讲普卡拉战斗机` → create a topic-source deck run.
+- `@deckit 介绍一下 F-16 战斗机` → produce an F-16 image-first deck end to end: brief, storyboard, prompts, generated slide PNGs, review, and a non-editable PPTX image container.
+- `@deckit summarize this article` → produce an article-summary deck end to end unless the user explicitly asks only for a summary.
+- `@deckit 讲讲普卡拉战斗机` → produce a topic-source deck run end to end.
 
-Minimum default output for a topic-only invocation is a deck brief, storyboard, and image prompt pack. If `$imagegen` is available and the user asks for generated slides or a full deck, continue to slide image generation. If the user asks for `.pptx`, generate slide images first, then use the stable packaging route.
+Minimum default output for an explicit Deckit invocation is a complete Deckit deliverable:
+
+1. `work/deck-brief.md`
+2. `work/storyboard.md`
+3. `prompts/README.md` and `prompts/<slide-id>.md`
+4. `assets/generated-slides/<slide-id>.png` from the official `$imagegen` skill
+5. `dist/<deck-name>.pptx` as a non-editable image container when packaging is available
+6. `dist/review.md` and, for PPTX, an audit result
+
+Do not stop at prose, a brief, a storyboard, or a prompt pack merely to ask whether to continue. Continue through `$imagegen` and packaging by default. Stop early only when the user explicitly requests a partial artifact, explicitly forbids slides/images/PPTX, or a required tool is unavailable.
 
 Exceptions: answer directly instead of starting a deck run when the user asks what Deckit can do, asks to install/debug/inspect/review Deckit, explicitly requests text-only output, or explicitly says not to create slides/deck artifacts.
+
+## No Continuation Gate
+
+Deckit should not insert a user-confirmation checkpoint between normal production stages.
+
+Forbidden during an explicit Deckit run:
+
+- Ending the turn after a plain topic explanation with "I can turn this into slides next."
+- Ending the turn after `work/storyboard.md` / `prompts/*.md` with "Say continue to generate images."
+- Asking the user to confirm image generation when `$imagegen` is available and the run is not explicitly text-only.
+- Asking whether to package as PPTX after all slide PNGs exist and packaging tools are available.
+
+Instead, announce the route briefly in commentary, then continue. Budget mode may change slide count and critique depth, but it must not silently downgrade an explicit Deckit invocation into "outline only" or "prompt pack only".
 
 ## Native PPTX Firewall
 
@@ -57,7 +79,7 @@ If the user explicitly requires editable PowerPoint objects, state the limitatio
 
 Visual polish does not make a deck image-first. A visually designed PowerPoint file is still native-PPTX if its slides contain editable text boxes, PowerPoint shapes, lines, charts, tables, or layout objects.
 
-If `$imagegen` was not invoked and `assets/generated-slides/<slide-id>.png` does not exist for every storyboard slide, do not deliver a PPTX. Stop at the prompt pack and say generated slide images are pending.
+If `$imagegen` is unavailable or fails and `assets/generated-slides/<slide-id>.png` does not exist for every storyboard slide, do not deliver a PPTX. Stop at the prompt pack and say generated slide images are pending. Do not choose this branch merely because the user has not written a separate "continue" message.
 
 Do not create native PowerPoint layouts as a substitute for generated images. Do not create a native-PPTX first and then backfill Deckit artifacts (`run.json`, `work/`, `prompts/`, or `dist/review.md`) to make it look like a Deckit run. Deckit artifacts must precede delivery and control the production path.
 
@@ -102,13 +124,14 @@ Prefer writing this into `dist/debug-evidence.md` when a run folder exists. Do n
 
 ## Workflow
 
-1. Identify the user's source material and desired output. If the source is a `.pdf` or an `http(s)` URL, route through `document-ingestor` first to produce `source/input.md`.
+1. Identify the user's source material and desired output. If Deckit was explicitly invoked and the source is only a topic or instruction, treat it as a source seed for a complete deck. If the source is a `.pdf` or an `http(s)` URL, route through `document-ingestor` first to produce `source/input.md`.
 2. Record `production_mode: image-first`. Do not ask the user to choose among production modes.
 3. Choose a **budget mode**: `quick`, `balanced`, or `premium`. The default when the user is silent is `balanced`.
 4. Select the minimum specialist workflow needed.
 5. Keep intermediate artifacts in predictable paths.
-6. For balanced or premium runs, invoke the official `$imagegen` skill to generate full-slide images from the prompt pack.
-7. Apply quality gates before calling the work done.
+6. Invoke the official `$imagegen` skill to generate full-slide images from the prompt pack unless the user explicitly asked for a partial/text-only artifact or `$imagegen` is unavailable.
+7. Package generated slide images into a non-editable PPTX image container when packaging is available.
+8. Apply quality gates before calling the work done.
 
 Use `../../references/workflow.md` for the production flow and `../../references/budget-modes.md` for budget decisions.
 
@@ -123,7 +146,7 @@ Hard rules:
 - A `.pptx` containing one full-slide PNG per slide is only a **packaging format** after the images already exist. It does not prove image-first generation by itself.
 - Programmatically drawing slide PNGs with local code (PIL, matplotlib, browser screenshots, SVG, HTML/CSS, or PowerPoint shapes) is local rendering, not image-first generation.
 - Do not invoke third-party presentation/PPTX skills or plugins during Deckit runs, including Codex `Presentations` and Anthropic `pptx`. They tend to produce native PowerPoint elements and will pull the workflow back into a route v0.3 intentionally disables.
-- If the user asks to "generate images", "use gpt-image", "use gpt-image-2", or "image-first", invoke `$imagegen` for each slide image, then store the resulting PNGs under a path such as `assets/generated-slides/`.
+- If the user explicitly invokes Deckit, or asks to "generate images", "use gpt-image", "use gpt-image-2", or "image-first", invoke `$imagegen` for each slide image, then store the resulting PNGs under a path such as `assets/generated-slides/`.
 - `$imagegen` is the required handoff for actual slide image generation when that skill is available. Do not replace it with Python, PIL, browser screenshots, SVG, PowerPoint, or other local rendering code.
 - If image generation is not available, stop after prompt production and say that generated slide images are pending; do not fake the generation step with local drawing code.
 - If the user explicitly asks for editable PowerPoint, explain that the active Deckit route is image-first and produces non-editable slide images; do not switch to an editable shape-by-shape deck workflow.
@@ -179,8 +202,8 @@ Image-first mode:
 - `work/storyboard.md`
 - `prompts/README.md`
 - `prompts/<slide-id>.md`
-- `assets/generated-slides/<slide-id>.png` only after an actual image-generation step has run (optional in V1, required if the user asked for generated slide images)
-- `dist/<deck-name>.pptx` only as an optional container around generated images, not as the primary image-generation method
+- `assets/generated-slides/<slide-id>.png` after an actual image-generation step has run
+- `dist/<deck-name>.pptx` as a container around generated images, not as the primary image-generation method
 
 Do not create native PowerPoint layout specs as a substitute for image prompts. Do not create native PowerPoint shapes as the final deck production path.
 

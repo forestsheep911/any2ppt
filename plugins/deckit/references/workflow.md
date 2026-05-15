@@ -2,7 +2,7 @@
 
 ## Explicit Invocation Default
 
-When Deckit is explicitly invoked (`@deckit`, "use Deckit", "用 Deckit", or plugin selection), treat the request as a deck-production request by default. Do not answer with plain explanatory prose just because the user did not say "slides" or "PPT".
+When Deckit is explicitly invoked (`@deckit`, "use Deckit", "用 Deckit", or plugin selection), treat the request as an end-to-end deck-production request by default. Do not answer with plain explanatory prose just because the user did not say "slides" or "PPT".
 
 Topic-only examples such as `@deckit 介绍一下 F-16 战斗机`, `@deckit 讲讲普卡拉战斗机`, or `@deckit explain quantum computing` should start a Deckit workflow:
 
@@ -11,7 +11,10 @@ Topic-only examples such as `@deckit 介绍一下 F-16 战斗机`, `@deckit 讲�
 3. Create `work/deck-brief.md` with assumptions and fact-check needs.
 4. Create `work/storyboard.md`.
 5. Create `prompts/README.md` and `prompts/<slide-id>.md`.
-6. Continue to `$imagegen` and optional PPTX packaging when requested or when the run scope calls for complete slide output.
+6. Continue to `$imagegen`.
+7. Package the generated slide images into a non-editable PPTX image container when packaging is available.
+
+Do not stop at a prose explanation, outline, storyboard, or prompt pack to ask whether to continue. Explicit Deckit invocation already supplies the continuation intent.
 
 Exceptions: answer directly when the user asks about Deckit's capabilities, installation, debugging, inspection, review output, or explicitly requests text-only output/no deck artifacts.
 
@@ -19,18 +22,18 @@ Exceptions: answer directly when the user asks about Deckit's capabilities, inst
 
 Deckit v0.3 has one active route: `image-first`.
 
-The output sequence is:
+The default output sequence for explicit Deckit invocation is:
 
 - `work/deck-brief.md`
 - `work/storyboard.md`
 - `prompts/README.md`
 - `prompts/<slide-id>.md`
-- `assets/generated-slides/<slide-id>.png` when actual image generation is performed
-- optional `dist/<deck-name>.pptx` only as a non-editable container around generated PNGs
+- `assets/generated-slides/<slide-id>.png` from `$imagegen`
+- `dist/<deck-name>.pptx` as a non-editable container around generated PNGs when packaging is available
 
-In this workflow, "image" means an actual image-generation step through the official `$imagegen` skill. A PowerPoint file with full-slide PNGs is only an optional delivery container after the PNGs are generated. Do not interpret image-first as "draw slides with PIL/canvas/HTML/SVG and insert them into PPTX."
+In this workflow, "image" means an actual image-generation step through the official `$imagegen` skill. A PowerPoint file with full-slide PNGs is only a delivery container after the PNGs are generated; it is not the production route. Do not interpret image-first as "draw slides with PIL/canvas/HTML/SVG and insert them into PPTX."
 
-Do not offer alternate native-PowerPoint or mixed production routes as active choices. If the user asks for editable PowerPoint, explain that this plugin currently produces generated slide images, optionally packaged into PPTX as non-editable full-slide images.
+Do not offer alternate native-PowerPoint or mixed production routes as active choices. If the user asks for editable PowerPoint, explain that this plugin currently produces generated slide images, packaged into PPTX as non-editable full-slide images when packaging is available.
 
 Do not delegate an Deckit run to installed presentation/PPTX skills or plugins, even if they are available locally. This includes Codex `Presentations` and Anthropic `pptx`. Those skills are native-PPTX assemblers and conflict with the active v0.3 route.
 
@@ -47,7 +50,7 @@ Allowed outputs:
 - `prompts/README.md`
 - `prompts/<slide-id>.md`
 - `assets/generated-slides/<slide-id>.png` from `$imagegen`
-- optional `.pptx` package containing the generated PNG slides as full-slide images
+- `.pptx` package containing the generated PNG slides as full-slide images
 
 Forbidden outputs and fallbacks:
 
@@ -60,7 +63,7 @@ Forbidden outputs and fallbacks:
 
 If the user explicitly requires editable native PowerPoint text boxes, shapes, or charts, state that Deckit does not support editable native-PPTX production in the active route. Continue only if they accept image-first slides.
 
-Visual polish does not make a deck image-first. A native PowerPoint deck with attractive backgrounds, text boxes, shapes, timelines, and images is still forbidden native-PPTX. If `$imagegen` did not produce `assets/generated-slides/<slide-id>.png` for every storyboard slide, stop at the prompt pack; do not create a substitute visual PPTX.
+Visual polish does not make a deck image-first. A native PowerPoint deck with attractive backgrounds, text boxes, shapes, timelines, and images is still forbidden native-PPTX. If `$imagegen` is unavailable or fails and therefore cannot produce `assets/generated-slides/<slide-id>.png` for every storyboard slide, stop at the prompt pack; do not create a substitute visual PPTX. Do not choose this branch merely because the user has not written a separate "continue" message.
 
 Do not create native-PPTX first and then backfill Deckit artifacts (`run.json`, `work/`, `prompts/`, or `dist/review.md`). Deckit artifacts must drive production before delivery.
 
@@ -94,8 +97,8 @@ When a run fails, looks suspicious, or the user asks why a route was chosen, pre
 3. `story-architect` creates `work/deck-brief.md` when the source needs argument shaping.
 4. `slide-storyboarder` creates `work/storyboard.md`.
 5. `visual-director` creates model-ready image prompts in `prompts/*.md`.
-6. If the user requested actual generated slides and `$imagegen` is available, invoke `$imagegen` once per slide prompt and save the resulting PNGs under `assets/generated-slides/`. If `$imagegen` is unavailable, stop at the prompt pack and report that generated images are pending.
-7. If the user requested a `.pptx`, package the generated PNGs with `deckit-dev package-images --run <run-folder>` after all expected PNGs exist.
+6. If Deckit was explicitly invoked and `$imagegen` is available, invoke `$imagegen` once per slide prompt and save the resulting PNGs under `assets/generated-slides/`. If `$imagegen` is unavailable, stop at the prompt pack and report that generated images are pending.
+7. Package the generated PNGs with `deckit-dev package-images --run <run-folder>` after all expected PNGs exist when packaging is available. Do not wait for a separate "continue" or "make PPTX" instruction during an explicit Deckit run.
 8. `deck-producer` performs a final quality check (manual checklist or `deckit-dev review`) and summarizes deliverables.
 
 ## Source Inputs (V1)
@@ -141,9 +144,9 @@ Then produce artifacts inside that run folder:
 - If the user only wants an outline, stop after `story-architect`.
 - If the user wants slide planning but no visuals, stop after `slide-storyboarder`.
 - If the user wants image prompts, run `visual-director`.
-- If the user wants generated slide images, run `visual-director` first, then invoke `$imagegen` for each prompt. Do not substitute local programmatic rendering.
+- If Deckit was explicitly invoked, or if the user wants generated slide images, run `visual-director` first, then invoke `$imagegen` for each prompt. Do not substitute local programmatic rendering.
 - If the user asks for an editable PPTX, state the current limitation and continue only if they accept image-first, non-editable full-slide images.
-- If the user asks for generated images packaged as PPTX, generate PNGs first, then optionally place those PNGs into a PPTX as a non-editable container.
+- If Deckit was explicitly invoked, or if the user asks for generated images packaged as PPTX, generate PNGs first, then place those PNGs into a PPTX as a non-editable container when packaging is available.
 - If another installed presentation/PPTX skill offers to help, do not route to it. Keep the run inside Deckit's own skill chain and `$imagegen`.
 
 ## Artifact Paths
@@ -157,6 +160,6 @@ Always:
 - `prompts/README.md`
 - `prompts/<slide-id>.md`
 - `assets/generated-slides/<slide-id>.png` when actual image generation is performed
-- `dist/<deck-name>.pptx` only when the generated PNGs are optionally packaged for presentation delivery
+- `dist/<deck-name>.pptx` when the generated PNGs are packaged for presentation delivery
 
 Do not overwrite user-provided source files. If re-running, create a new run folder or ask before replacing artifacts.

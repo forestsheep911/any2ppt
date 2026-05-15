@@ -1,6 +1,6 @@
 # Budget Modes
 
-Deckit v0.3 has one active route: image-first with actual image generation when generated slides are requested. Budget mode says how thoroughly that route is executed. The default when the user is silent is `balanced`.
+Deckit v0.3 has one active route for explicit Deckit invocation: image-first with actual image generation, review, and PPTX image-container packaging. Budget mode says how large and polished that route is; it must not change the route into "plain prose", "outline only", or "prompt pack only" unless the user explicitly asks for a partial/text-only artifact or a required tool is unavailable. The default when the user is silent is `balanced`.
 
 ## quick
 
@@ -10,10 +10,12 @@ Default scope:
 
 - Deck brief.
 - Slide storyboard.
-- No image generation.
-- No multi-pass critique.
+- Visual direction and per-slide image prompts.
+- Generated slide images through the official `$imagegen` skill when available.
+- Non-editable PPTX image-container packaging when packaging is available.
+- Single-pass review; no multi-pass critique.
 
-Target slide count: **5-7**.
+Target slide count: **4-6**.
 
 ## balanced
 
@@ -25,6 +27,8 @@ Default scope:
 - Slide storyboard.
 - Visual direction.
 - Per-slide image prompts.
+- Generated slide images through the official `$imagegen` skill when available.
+- Non-editable PPTX image-container packaging when packaging is available.
 - Lightweight quality check via `deckit-dev review`.
 
 Target slide count: **7-10**.
@@ -39,6 +43,7 @@ Default scope:
 - Slide storyboard.
 - Visual direction.
 - Generated images when `$imagegen` is available. "Generated images" means images produced by the official `$imagegen` skill, not locally rendered screenshots or PIL/canvas output.
+- Non-editable PPTX image-container packaging when packaging is available.
 - Render or screenshot review.
 - Iteration on weak slides.
 
