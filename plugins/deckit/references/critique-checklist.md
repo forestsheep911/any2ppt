@@ -1,6 +1,6 @@
 # Critique Checklist
 
-Use this checklist before treating a deck plan or prompt pack as ready. The `deckit-dev review` subcommand automates the structural items (artifact presence, slide-ID format, archetype names, slide-count band, per-archetype support-point band, prompt-to-storyboard mapping). The judgement items below still require a human read.
+Use this checklist before treating a deck plan, prompt pack, or packaged delivery as ready. The structural items include artifact presence, slide-ID format, archetype names, slide-count band, per-archetype support-point band, prompt-to-storyboard mapping, and image-container packaging invariants. The judgement items below still require a human read.
 
 ## Argument
 
@@ -33,4 +33,4 @@ Use this checklist before treating a deck plan or prompt pack as ready. The `dec
 - Intermediate artifact paths are clear.
 - Expensive steps are explicit.
 - Future work is separated from v1 deliverables.
-- `deckit-dev review --run <name>` was run and `dist/review.md` is archived in the run folder.
+- `dist/review.md` is archived in the run folder with the manual or automated review result.

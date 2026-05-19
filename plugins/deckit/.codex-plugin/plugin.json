@@ -1,9 +1,9 @@
 {
   "name": "deckit",
-  "version": "0.3.9",
+  "version": "0.4.0",
   "description": "An end-to-end image-first deck workflow with a recommendation gate, PPTX/PDF final delivery, and an automatic vertical preview image.",
   "author": {
-    "name": "fores"
+    "name": "darkwise"
   },
   "license": "UNLICENSED",
   "keywords": [
@@ -17,18 +17,20 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Deckit",
-    "shortDescription": "Run topic/source material into generated image-first slides and packaged deliverables.",
-    "longDescription": "Deckit coordinates an end-to-end image-first deck production workflow: ingest text / PDF / URL or a topic seed, show a recommended production plan before expensive generation unless the user explicitly asks to use defaults or skip questions, shape the argument, plan slide storyboards, write image-generation prompts, invoke the official $imagegen skill to produce full-slide images, package those images into the requested final delivery target, produce a standard medium-size vertical preview image, and run review/audit before delivery. Supported final delivery targets are non-editable image-container PPTX and image-only PDF. Artifacts are written under the user's active working directory, preferably outputs/<run-name>, and Deckit should not leave mirrored production runs in the plugin installation directory. Generated slide PNGs are retained as intermediate artifacts, and dist/preview.png is produced automatically for quick visual inspection and mobile-friendly scanning. When explicitly invoked, Deckit treats topic-only requests such as \"介绍一下 F-16\" as deck-production requests, not plain prose answers and not prompt-pack-only runs; it first offers A/B/C choices to accept the recommendation, expand options, or add custom requirements, then continues without additional stage-by-stage confirmation. Ambiguous requests such as \"make a PPT\" or \"制作 PPT\" are handled as image-first slide generation. Deckit does not create editable native PowerPoint decks; a .pptx is only a non-editable container for generated full-slide images that passes audit-pptx as exactly one picture per slide.",
-    "developerName": "fores",
-    "category": "Productivity",
+    "displayName": "Deckit v0.4.0",
+    "shortDescription": "v0.4.0 - Create image-first slide decks with generated full-slide images and PPTX/PDF delivery.",
+    "longDescription": "Version: 0.4.0. Deckit coordinates an end-to-end image-first deck production workflow: ingest text, PDF, URL, or a topic seed; recommend a production plan before expensive generation unless defaults are requested; shape the argument; plan slide storyboards; write image-generation prompts; invoke the official $imagegen skill to produce full-slide images; package those images into the requested final delivery target; produce a standard medium-size vertical preview image; and run review/audit before delivery. Supported final delivery targets are non-editable image-container PPTX and image-only PDF. Artifacts are written under the user's active working directory, preferably outputs/<run-name>, and Deckit should not leave mirrored production runs in the plugin installation directory. Generated slide PNGs are retained as intermediate artifacts, and dist/preview.png is produced automatically for quick visual inspection and mobile-friendly scanning. When explicitly invoked, Deckit treats topic-only requests such as \"summarize this article\" or \"explain this research topic\" as deck-production requests, not plain prose answers and not prompt-pack-only runs. It first offers A/B/C choices to accept the recommendation, expand options, or add custom requirements, then continues without additional stage-by-stage confirmation. Ambiguous requests such as \"make a PPT\" or \"create a presentation\" are handled as image-first slide generation. Deckit does not create editable native PowerPoint decks; a .pptx is only a non-editable container for generated full-slide images and must audit as exactly one full-slide picture per slide with no native editable slide content.",
+    "developerName": "darkwise",
+    "category": "Presentation Design",
     "capabilities": [
       "Analyze",
-      "Write"
+      "Design",
+      "Generate",
+      "Export"
     ],
     "defaultPrompt": [
       "Turn this transcript into a complete image-first deck with generated full-slide images, PPTX packaging, and a preview image.",
-      "介绍一下 F-16 战斗机。",
+      "Explain this research topic as an image-first deck.",
       "Make a complete image-first deck; first recommend a plan and ask whether to accept it, expand options, or add custom requirements."
     ],
     "brandColor": "#2563EB"

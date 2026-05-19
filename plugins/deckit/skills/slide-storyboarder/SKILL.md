@@ -38,7 +38,7 @@ Examples: `00_cover`, `03_production_team`, `07_closing`.
 - Respect any accepted preflight rough outline from `work/deck-brief.md` "Skill Notes" unless a concrete source conflict requires changing it.
 - Respect `requested_output.target_slide_count` in `run.json` when present. Treat it as approximate unless the target is 1; if you miss it by more than one slide, record the reason in the storyboard's Deck Meta or in the brief's Skill Notes.
 - The final delivery target is only a packaging choice (`pptx` or `pdf`); do not change the storyboard into a special alternate image-only format. Generated slide PNGs and `dist/preview.png` are standard artifacts derived from the storyboard.
-- Write titles that can be spoken aloud by a presenter, and keep titles under 80 characters (the `deckit-dev review` tool warns above this).
+- Write titles that can be spoken aloud by a presenter, and keep titles under 80 characters.
 - Avoid repetitive slide structures unless the repetition has a purpose.
 - Keep support points short enough to become slide text.
 - Add `- **Speaker notes**:` to every slide. Write this as presenter-facing talk-track guidance, not visible slide copy: what to say first, the core point to emphasize, how to use the support points, and any transition into the next slide.
@@ -55,7 +55,7 @@ Target slide counts per budget mode:
 - `balanced`: 7-10 slides
 - `premium`: 8-14 slides
 
-The `deckit-dev review` tool warns when the storyboard's slide count is outside the band for the chosen budget. A documented exception is allowed (record the reason in the storyboard's Deck Meta or in the brief's Skill Notes).
+If the storyboard's slide count is outside the band for the chosen budget, record the reason in the storyboard's Deck Meta or in the brief's Skill Notes.
 
 ## Support Point Counts by Archetype
 
@@ -68,4 +68,4 @@ The default rule is 2-4 support points per slide. Some archetypes break this rul
 - `thesis`: 2-6 (multiple pillars allowed).
 - All other archetypes: 2-4.
 
-The `deckit-dev review` tool enforces these per-archetype bands; treat its warnings as evidence to either reshape the slide or document the exception.
+Treat these per-archetype bands as review rules. If a slide needs to exceed them, reshape the slide or document the exception.

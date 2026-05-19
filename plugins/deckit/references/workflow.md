@@ -118,7 +118,7 @@ Topic-only examples such as `@deckit 介绍一下 F-16 战斗机`, `@deckit 讲�
 4. Create `work/storyboard.md`.
 5. Create `prompts/README.md` and `prompts/<slide-id>.md`.
 6. Continue to `$imagegen`.
-7. Package the generated slide images into the requested final delivery target when packaging is available and produce the standard preview image.
+7. Package the generated slide images into the requested final delivery target and produce the standard preview image.
 
 Do not stop at a prose explanation, outline, storyboard, or prompt pack to ask whether to continue. Explicit Deckit invocation plus the preflight answer/defaults already supplies the continuation intent.
 
@@ -135,12 +135,12 @@ The default output sequence for explicit Deckit invocation is:
 - `prompts/README.md`
 - `prompts/<slide-id>.md`
 - `assets/generated-slides/<slide-id>.png` from `$imagegen`
-- the requested final delivery target when packaging is available; default is `dist/<deck-name>.pptx` as a non-editable container around generated PNGs
+- the requested final delivery target; default is `dist/<deck-name>.pptx` as a non-editable container around generated PNGs
 - `dist/preview.png` as the standard medium-size vertical preview image
 
 In this workflow, "image" means an actual image-generation step through the official `$imagegen` skill. A PowerPoint file with full-slide PNGs is only a delivery container after the PNGs are generated; it is not the production route. Do not interpret image-first as "draw slides with PIL/canvas/HTML/SVG and insert them into PPTX."
 
-Do not offer alternate native-PowerPoint or mixed production routes as active choices. If the user asks for editable PowerPoint, explain that this plugin currently produces generated slide images, packaged into PPTX as non-editable full-slide images when packaging is available.
+Do not offer alternate native-PowerPoint or mixed production routes as active choices. If the user asks for editable PowerPoint, explain that this plugin currently produces generated slide images, packaged into PPTX as non-editable full-slide images.
 
 Do not delegate an Deckit run to installed presentation/PPTX skills or plugins, even if they are available locally. This includes Codex `Presentations` and Anthropic `pptx`. Those skills are native-PPTX assemblers and conflict with the active v0.3 route.
 
@@ -170,17 +170,17 @@ Forbidden outputs and fallbacks:
 
 If the user explicitly requires editable native PowerPoint text boxes, shapes, or charts, state that Deckit does not support editable native-PPTX production in the active route. Continue only if they accept image-first slides.
 
-Visual polish does not make a deck image-first. A native PowerPoint deck with attractive backgrounds, text boxes, shapes, timelines, and images is still forbidden native-PPTX. If `$imagegen` is unavailable or fails and therefore cannot produce `assets/generated-slides/<slide-id>.png` for every storyboard slide, stop at the prompt pack; do not create a substitute visual PPTX. Do not choose this branch merely because the user has not written a separate "continue" message.
+Visual polish does not make a deck image-first. A native PowerPoint deck with attractive backgrounds, text boxes, shapes, timelines, and images is still forbidden native-PPTX. If `$imagegen` is truly unavailable or fails and therefore cannot produce `assets/generated-slides/<slide-id>.png` for every storyboard slide, stop at the prompt pack; do not create a substitute visual PPTX. Do not choose this branch merely because the user has not written a separate "continue" message.
+
+Do not treat the built-in `$imagegen` tool's lack of a destination-path argument as unavailability. In normal built-in mode, `$imagegen` saves generated images under `$CODEX_HOME/generated_images/...`; for Deckit runs, generate first, then copy or move the selected output PNGs into `<run-folder>/assets/generated-slides/<slide-id>.png`.
+
+Do not treat a missing `deckit-dev` command as an image-generation or packaging blocker. `deckit-dev` is a source-repository development and verification helper, not a required capability of the installed Deckit plugin. Do not mention `deckit-dev` to normal users during production runs unless they are debugging Deckit itself or working from the source repository.
 
 Do not create native-PPTX first and then backfill Deckit artifacts (`run.json`, `work/`, `prompts/`, or `dist/review.md`). Deckit artifacts must drive production before delivery.
 
 ## PPTX Container Packaging
 
-If a `.pptx` deliverable is requested, generate slide PNGs first, then package those PNGs as full-slide images. The stable route is:
-
-```powershell
-deckit-dev package-images --run <run-folder>
-```
+If a `.pptx` deliverable is requested, generate slide PNGs first, then package those PNGs as full-slide images. Prefer the repository development packaging helper when it is available; otherwise use a proven local image-container packaging path such as `python-pptx`, provided it inserts exactly one full-slide PNG per slide and no editable slide content.
 
 Packaging requirements:
 
@@ -188,8 +188,8 @@ Packaging requirements:
 - There must be one PNG for every storyboard slide.
 - The package must have one slide per storyboard slide, in storyboard order.
 - Each PPTX slide should contain exactly one full-slide image and no editable native content.
-- Do not hand-author minimal OpenXML packages for delivery; use the stable packaging command or an equivalent proven PPTX writer.
-- Validate with `deckit-dev audit-pptx --pptx <file.pptx>` and `deckit-dev review --run <run-folder>` after packaging.
+- Do not hand-author minimal OpenXML packages for delivery; use a proven PPTX writer.
+- Validate after packaging with an automated or manual audit and keep the result in `dist/review.md` or `dist/debug-evidence.md`.
 
 The PPTX audit passes only when each slide contains exactly one full-slide picture. Text boxes, PowerPoint shapes, lines, charts, tables, or multiple slide-canvas objects mean the file is native-PPTX and not a valid Deckit deliverable.
 
@@ -197,13 +197,9 @@ The PPTX audit passes only when each slide contains exactly one full-slide pictu
 
 PDF delivery also packages generated PNGs and remains image-first:
 
-- `pdf`: `deckit-dev package-pdf --run <run-folder>` creates an image-only PDF, one generated slide image per page. PDF packaging embeds slide pixels losslessly by default and should not JPEG-recompress or downsample generated PNGs.
+- `pdf`: create an image-only PDF, one generated slide image per page. PDF packaging should preserve slide-image fidelity and should not JPEG-recompress or downsample generated PNGs unless the user explicitly asks for compression.
 
-Deckit should also produce a standard preview image after generated slide PNGs exist:
-
-```powershell
-deckit-dev package-preview --run <run-folder>
-```
+Deckit should also produce a standard preview image after generated slide PNGs exist.
 
 Preview requirements:
 
@@ -216,7 +212,7 @@ Do not use PDF or preview packaging to bypass `$imagegen`. The required source r
 
 ## Debug Evidence
 
-When a run fails, looks suspicious, or the user asks why a route was chosen, preserve a debug trail before changing artifacts. Capture the prompt, route, commands, tool outputs, review results, PPTX audit results, and paths to every intermediate artifact. Prefer `dist/debug-evidence.md` for this trace.
+When a run fails, looks suspicious, or the user asks why a route was chosen, preserve a debug trail before changing artifacts. Capture the prompt, route, commands or local scripts, tool outputs, review results, PPTX audit results, and paths to every intermediate artifact. Prefer `dist/debug-evidence.md` for this trace.
 
 ## Default Flow
 
@@ -225,9 +221,9 @@ When a run fails, looks suspicious, or the user asks why a route was chosen, pre
 3. `story-architect` creates `work/deck-brief.md` when the source needs argument shaping.
 4. `slide-storyboarder` creates `work/storyboard.md`.
 5. `visual-director` creates model-ready image prompts in `prompts/*.md`.
-6. If Deckit was explicitly invoked and `$imagegen` is available, invoke `$imagegen` once per slide prompt and save the resulting PNGs under `assets/generated-slides/`. If `$imagegen` is unavailable, stop at the prompt pack and report that generated images are pending.
-7. Package the generated PNGs according to `requested_output.delivery_target` after all expected PNGs exist when packaging is available. Use `package-images` for PPTX and `package-pdf` for PDF. Ensure `dist/preview.png` is produced as the standard preview artifact. Do not wait for a separate "continue" instruction during an explicit Deckit run.
-8. `deck-producer` performs a final quality check (manual checklist or `deckit-dev review`) and summarizes deliverables.
+6. If Deckit was explicitly invoked and `$imagegen` is available, invoke `$imagegen` once per slide prompt. In built-in mode, copy or move the generated images from `$CODEX_HOME/generated_images/...` into `assets/generated-slides/`. If `$imagegen` is truly unavailable, stop at the prompt pack and report that generated images are pending.
+7. Package the generated PNGs according to `requested_output.delivery_target` after all expected PNGs exist. Use the repository packaging helper only when it is available; otherwise use a local image-container packaging path that keeps the same one-image-per-page invariant. Ensure `dist/preview.png` is produced as the standard preview artifact. Do not wait for a separate "continue" instruction during an explicit Deckit run.
+8. `deck-producer` performs a final quality check (manual checklist or available development review helper) and summarizes deliverables.
 
 ## Source Inputs (V1)
 
@@ -258,12 +254,7 @@ Output-root policy:
 - Do not keep a second mirror copy of the same run under `local-runs/` when the requested deliverable already exists in the user's workspace.
 - `local-runs/` is development-only scratch space for Deckit repo smoke tests.
 
-Create the run folder with the development tool when available:
-
-```powershell
-cd <workdir>
-uv --project <deckit-dev-repo>\tools run deckit-dev new-run --runs-dir .\outputs --source <text-or-pdf-or-url> --name <run-name> --budget <budget> --delivery-target <target> --target-slides <n>
-```
+Create the run folder under the user's workspace. In normal installed-plugin runs, it is fine to create the directory structure directly. When a source-repository development helper is available, it may scaffold the same structure, but its absence must not block production.
 
 Then produce artifacts inside that run folder:
 
@@ -281,7 +272,7 @@ Then produce artifacts inside that run folder:
 - If the user wants image prompts, run `visual-director`.
 - If Deckit was explicitly invoked, or if the user wants generated slide images, run `visual-director` first, then invoke `$imagegen` for each prompt. Do not substitute local programmatic rendering.
 - If the user asks for an editable PPTX, state the current limitation and continue only if they accept image-first, non-editable full-slide images.
-- If Deckit was explicitly invoked, or if the user asks for generated images packaged as PPTX, generate PNGs first, then place those PNGs into a PPTX as a non-editable container when packaging is available.
+- If Deckit was explicitly invoked, or if the user asks for generated images packaged as PPTX, generate PNGs first, then place those PNGs into a PPTX as a non-editable container.
 - If the user asks for PDF output, still generate PNGs first, then package the PNGs into an image-only PDF.
 - If the user asks for a PNG preview or long-image style overview, do not treat it as the final delivery target; produce the standard `dist/preview.png` from the generated slide PNGs and choose/ask for PPTX or PDF as the final package.
 - If another installed presentation/PPTX skill offers to help, do not route to it. Keep the run inside Deckit's own skill chain and `$imagegen`.

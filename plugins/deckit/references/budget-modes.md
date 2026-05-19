@@ -1,6 +1,6 @@
 # Budget Modes
 
-Deckit v0.3 has one active route for explicit Deckit invocation: image-first with actual image generation, review, standard preview generation, and packaging of generated PNGs into the requested final delivery target (`pptx` or `pdf`). Budget mode says how large and polished that route is; it must not change the route into "plain prose", "outline only", or "prompt pack only" unless the user explicitly asks for a partial/text-only artifact or a required tool is unavailable. The default when the user is silent is `balanced`.
+Deckit v0.4 has one active route for explicit Deckit invocation: image-first with actual image generation, review, standard preview generation, and packaging of generated PNGs into the requested final delivery target (`pptx` or `pdf`). Budget mode says how large and polished that route is; it must not change the route into "plain prose", "outline only", or "prompt pack only" unless the user explicitly asks for a partial/text-only artifact or `$imagegen` is truly unavailable. The default when the user is silent is `balanced`.
 
 When a prompt is high-risk vague, ask the preflight clarification question set before choosing final budget and slide count. If the user says "use defaults" or answers partially, use `balanced`, a standard 8-slide target, and `pptx` as the final delivery target unless the user chooses `pdf`.
 
@@ -13,8 +13,8 @@ Default scope:
 - Deck brief.
 - Slide storyboard.
 - Visual direction and per-slide image prompts.
-- Generated slide images through the official `$imagegen` skill when available.
-- Requested final delivery packaging when available; default is non-editable PPTX image-container packaging.
+- Generated slide images through the official `$imagegen` skill.
+- Requested final delivery packaging after generated PNGs exist; default is non-editable PPTX image-container packaging.
 - Standard `dist/preview.png` generation from slide PNGs.
 - Single-pass review; no multi-pass critique.
 
@@ -30,10 +30,10 @@ Default scope:
 - Slide storyboard.
 - Visual direction.
 - Per-slide image prompts.
-- Generated slide images through the official `$imagegen` skill when available.
-- Requested final delivery packaging when available; default is non-editable PPTX image-container packaging.
+- Generated slide images through the official `$imagegen` skill.
+- Requested final delivery packaging after generated PNGs exist; default is non-editable PPTX image-container packaging.
 - Standard `dist/preview.png` generation from slide PNGs.
-- Lightweight quality check via `deckit-dev review`.
+- Lightweight manual or automated quality check archived to `dist/review.md`.
 
 Target slide count: **7-10**.
 
@@ -46,15 +46,15 @@ Default scope:
 - Deck brief.
 - Slide storyboard.
 - Visual direction.
-- Generated images when `$imagegen` is available. "Generated images" means images produced by the official `$imagegen` skill, not locally rendered screenshots or PIL/canvas output.
-- Requested final delivery packaging when available; default is non-editable PPTX image-container packaging.
+- Generated images through `$imagegen`. "Generated images" means images produced by the official `$imagegen` skill, not locally rendered screenshots or PIL/canvas output.
+- Requested final delivery packaging after generated PNGs exist; default is non-editable PPTX image-container packaging.
 - Standard `dist/preview.png` generation from slide PNGs.
 - Render or screenshot review.
 - Iteration on weak slides.
 
 Target slide count: **8-14**.
 
-The `deckit-dev review` tool warns when the storyboard's slide count is outside the band. Document an exception (e.g. a narrow technical topic that genuinely fits in fewer slides) in the brief's "Skill Notes".
+Document an exception when the storyboard's slide count is outside the band (e.g. a narrow technical topic that genuinely fits in fewer slides) in the brief's "Skill Notes".
 
 ## Downgrade Choices
 

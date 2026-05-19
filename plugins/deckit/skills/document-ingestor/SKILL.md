@@ -24,23 +24,13 @@ Other formats (DOCX, PPTX, XLSX, video, audio) are not supported in V1; defer to
 
 Always writes `<run>/source/input.md` (Markdown). The original source path or URL is recorded in `run.json` under `source.original_path` and `source.type` is set to `pdf` or `url`. This keeps the run traceable back to the original input.
 
-## Tool
+## Execution
 
-When the dev tool is available, use either of these forms:
+In installed-plugin runs, create `<run>/source/input.md` directly in the user's run folder. Do not require repository development tools.
 
-```powershell
-cd tools
+For PDFs, use an available PDF text-extraction library or existing document/PDF capability, preserve page breaks where possible, and write one Markdown file. For URLs, fetch the page once, keep the main readable content, strip navigation/scripts/footers where practical, and write one Markdown file.
 
-# Standalone ingest (writes a Markdown file you can review before creating a run)
-uv run deckit-dev ingest --pdf <file.pdf> --out <run>\source\input.md
-uv run deckit-dev ingest --url <https://example.com/post> --out <run>\source\input.md
-
-# Or have new-run call the ingestor automatically
-uv run deckit-dev new-run --source <file.pdf> --name <run>
-uv run deckit-dev new-run --source https://example.com/post --name <run>
-```
-
-`new-run` infers the source type from the value: a `.pdf` suffix triggers the PDF ingestor; an `http://` or `https://` prefix triggers the URL ingestor; anything else is treated as a text file.
+If a source-repository development helper is available, it may be used as a convenience, but its absence must not block ingestion. Do not mention development helper commands to normal users unless they are debugging Deckit itself or working from the source repository.
 
 ## Quality Notes
 

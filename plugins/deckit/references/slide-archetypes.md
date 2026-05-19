@@ -28,11 +28,11 @@ Use archetypes to keep slides structured and presentable.
 
 `slide-storyboarder` writes the chosen archetype on each slide as `**Archetype**: <name>`. Use one of the names in the "Core Archetypes" list (case-insensitive). Parenthetical clarifications are fine — `Thesis (four pillars)` and `Comparison (two columns)` both validate as `thesis` and `comparison` respectively.
 
-The `deckit-dev review` tool warns (`SLIDE-ARCHETYPE-UNKNOWN`) when an archetype name is not in the list above. If a new archetype is genuinely needed, add it here first, otherwise reshape the slide to fit an existing one.
+If an archetype name is not in the list above, treat it as a review finding. If a new archetype is genuinely needed, add it here first; otherwise reshape the slide to fit an existing one.
 
 ## Per-Archetype Support Point Bands
 
-The `deckit-dev review` tool checks the number of support points per slide. The bands match the storyboarder skill (`SKILL.md`, "Support Point Counts by Archetype"):
+Review the number of support points per slide against the bands below. The bands match the storyboarder skill (`SKILL.md`, "Support Point Counts by Archetype"):
 
 - `cover`, `closing`: not constrained.
 - `process`: 2-7.
