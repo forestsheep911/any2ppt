@@ -1,6 +1,6 @@
 # PPTX-Native Breaking Experiment — Week 4 Result
 
-> Archive note: this experiment is historical. As of v0.3, Deckit removes the active `pptx-native` route and the dev CLI no longer exposes `deckit-dev pptx draft`. The active route is image-first generation only.
+> Archive note: this experiment is historical. As of v0.4, Deckit removes the active `pptx-native` route and the dev CLI no longer exposes `deckit-dev pptx draft`. The active route is image-first generation only.
 
 ## Goal
 

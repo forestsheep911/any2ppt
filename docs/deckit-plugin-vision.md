@@ -8,7 +8,7 @@ The plugin should not start as a large automation system. Its first job is to pr
 
 The long-term product can grow into a configurable local tool with style systems, budget choices, source adapters, PPTX assembly, and review loops. Version 1 should stay small enough to use, inspect, and improve.
 
-Current direction: Deckit v0.3 is image-first only. Historical notes about alternate production modes remain in `docs/production-mode-insights.md`, but they are not active plugin guidance.
+Current direction: Deckit v0.4 is image-first only. Historical notes about alternate production modes remain in `docs/production-mode-insights.md`, but they are not active plugin guidance.
 
 ## Product Principle
 
@@ -238,7 +238,7 @@ Candidate product parameters:
 
 - Budget: quick, balanced, premium.
 - Output: brief, storyboard, prompts, images, PPTX.
-- Production mode: image-first only in v0.3.
+- Production mode: image-first only in v0.4.
 - Style: editorial, consulting, academic, cinematic, product pitch.
 - Language: Simplified Chinese, Traditional Chinese, English, bilingual.
 - Editability: visual artifact, editable native deck, mixed editable overlays.

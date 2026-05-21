@@ -12,11 +12,11 @@ When releasing a new Deckit plugin version, do not stop after updating the plugi
 
 1. Update and verify the plugin manifest version:
    - File: `plugins/deckit/.codex-plugin/plugin.json`
-   - Check that `"version"` matches the intended release version, for example `0.3.5`.
+   - Check that `"version"` matches the intended release version, for example `0.4.0`.
 2. Commit and push all release changes in the `forestsheep911/deckit` repository.
 3. Create and push a matching version tag from the release commit:
-   - Example: `git tag -a v0.3.5 -m "Release Deckit v0.3.5"`
-   - Example: `git push origin v0.3.5`
+   - Example: `git tag -a v0.4.0 -m "Release Deckit v0.4.0"`
+   - Example: `git push origin v0.4.0`
 4. Update the 2water marketplace repository:
    - Repository: `forestsheep911/codex-plugin-marketplace-2water`
    - File: `.agents/plugins/marketplace.json`
@@ -25,7 +25,7 @@ When releasing a new Deckit plugin version, do not stop after updating the plugi
      - `"url": "forestsheep911/deckit"`
      - `"path": "plugins/deckit"`
    - Update only the Deckit source ref to the new tag, for example:
-     - `"ref": "v0.3.5"`
+     - `"ref": "v0.4.0"`
 5. Commit and push the marketplace change to its `main` branch.
 6. Verify both remote references exist:
    - `git ls-remote --tags https://github.com/forestsheep911/deckit.git refs/tags/vX.Y.Z`

@@ -7,7 +7,7 @@ description: Main Deckit coordinator for end-to-end image-first deck production.
 
 Act as the production owner for Deckit deck work. Optimize for a usable image-first presentation under real constraints: source quality, token budget, time, image generation cost, and requested output.
 
-Deckit v0.3 has one active production route: **image-first with actual image generation, followed by review and PPTX image-container packaging**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
+Deckit v0.4 has one active production route: **image-first with actual image generation, followed by review and PPTX image-container packaging**. Do not choose, suggest, or implement alternate native-PowerPoint or mixed production routes during normal runs.
 
 ## Invocation Default
 
@@ -281,7 +281,7 @@ Hard rules:
 
 - A `.pptx` containing one full-slide PNG per slide is only a **packaging format** after the images already exist. It does not prove image-first generation by itself.
 - Programmatically drawing slide PNGs with local code (PIL, matplotlib, browser screenshots, SVG, HTML/CSS, or PowerPoint shapes) is local rendering, not image-first generation.
-- Do not invoke third-party presentation/PPTX skills or plugins during Deckit runs, including Codex `Presentations` and Anthropic `pptx`. They tend to produce native PowerPoint elements and will pull the workflow back into a route v0.3 intentionally disables.
+- Do not invoke third-party presentation/PPTX skills or plugins during Deckit runs, including Codex `Presentations` and Anthropic `pptx`. They tend to produce native PowerPoint elements and will pull the workflow back into a route v0.4 intentionally disables.
 - If the user explicitly invokes Deckit, or asks to "generate images", "use gpt-image", "use gpt-image-2", or "image-first", invoke `$imagegen` for each slide image, then store the resulting PNGs under a path such as `assets/generated-slides/`.
 - `$imagegen` is the required handoff for actual slide image generation when that skill is available. Do not replace it with Python, PIL, browser screenshots, SVG, PowerPoint, or other local rendering code.
 - If image generation is truly not available, stop after prompt production and say that generated slide images are pending; do not fake the generation step with local drawing code.

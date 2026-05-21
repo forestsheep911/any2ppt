@@ -9,7 +9,7 @@ Turn a slide storyboard into visual treatments and model-ready image-generation 
 
 ## Output
 
-Deckit v0.3 has one active production route: image-first with actual image generation. Create:
+Deckit v0.4 has one active production route: image-first with actual image generation. Create:
 
 - `prompts/README.md` with global style direction and source references. Its first line should record the production mode.
 - `prompts/<slide-id>.md` with one complete prompt per slide.

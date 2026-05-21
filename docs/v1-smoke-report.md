@@ -1,6 +1,6 @@
 # Week 1 Smoke Report — smoke-text-input
 
-> Current note: v0.3 makes image-first generation the only active route. Mentions of earlier production-mode ambiguity below are historical context, not current guidance.
+> Current note: v0.4 keeps image-first generation as the only active route. Mentions of earlier production-mode ambiguity below are historical context, not current guidance.
 
 ## Run Summary
 - Source: `docs/deckit-plugin-vision.md` (~250 lines, structured markdown)

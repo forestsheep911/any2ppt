@@ -1,8 +1,8 @@
-# Deckit V1 Status — v0.3.5
+# Deckit V1 Status — v0.4.0
 
 This is the closing report for the six-week V1 validation roadmap defined in [v1-roadmap.md](v1-roadmap.md). It records what shipped, what did not, and what is queued for V2+.
 
-> Current release note: v0.3.5 keeps the active plugin route image-first only, preserves the native-PPTX firewall for ambiguous "make a PPT" requests, treats explicit Deckit invocations such as `@deckit 介绍一下 F-16 战斗机` as deck-production requests by default, and adds PPTX auditing to reject substitute visual native-PPTX decks. Historical alternate-output research remains in archived docs, but those routes are no longer offered by the plugin skills or dev CLI.
+> Current release note: v0.4.0 keeps the active plugin route image-first only, preserves the native-PPTX firewall for ambiguous "make a PPT" requests, treats explicit Deckit invocations such as `@deckit 介绍一下 F-16 战斗机` as deck-production requests by default, and adds PPTX auditing to reject substitute visual native-PPTX decks. Historical alternate-output research remains in archived docs, but those routes are no longer offered by the plugin skills or dev CLI.
 
 > Packaging note: image-first `.pptx` delivery is allowed only as a non-editable container around generated PNG slides. Use `deckit-dev package-images --run <run-folder>` for this stable packaging path and `deckit-dev audit-pptx --pptx <file.pptx>` to verify the result; do not hand-author minimal OpenXML PPTX packages or substitute visual native-PPTX layouts.
 
@@ -10,7 +10,7 @@ This is the closing report for the six-week V1 validation roadmap defined in [v1
 
 ## V1 At a Glance
 
-- Plugin version: **0.3.5** (was 0.1.0 at the start of the roadmap; v0.3.x makes image-first generation the only active path).
+- Plugin version: **0.4.0** (was 0.1.0 at the start of the roadmap; v0.4.x keeps image-first generation the only active path).
 - Specialist skills: **5** (was 4).
   - `deck-producer`, `story-architect`, `slide-storyboarder`, `visual-director` (V1 originals).
   - `document-ingestor` (added in Week 5 as the post-W4 route).
@@ -23,7 +23,7 @@ This is the closing report for the six-week V1 validation roadmap defined in [v1
 ```text
 === INSPECT ===
 plugin: deckit
-version: 0.3.5
+version: 0.4.0
 skills: 5
 - deck-producer: skills\deck-producer
 - document-ingestor: skills\document-ingestor
@@ -76,12 +76,12 @@ Six subcommands:
 - Image-first generation smoke: `local-runs/smoke-current/` (2026-05-11; gitignored). This validated source → brief → storyboard → prompts → 8 generated slide PNGs → visual review, using external image generation rather than plugin-internal API calls.
 - Cross-repo install + small deck: `C:\Users\fores\dev\trytry\deckit-install-test\pin-python-version\` (W2; gitignored).
 - Sanmiao image-first sample: in-tree slim version (W3).
-- PPTX-native experimental draft: `local-runs/smoke-text-input/dist/draft.pptx` (W4; historical only, removed from the active v0.3 CLI).
+- PPTX-native experimental draft: `local-runs/smoke-text-input/dist/draft.pptx` (W4; historical only, removed from the active v0.4 CLI).
 - PDF + URL ingest end-to-end: `deckit-install-test/ingest-test/{pdf,url}-end-to-end/` with deck-brief produced for both (W5).
 
 ## What V1 Did Not Ship (deferred, as planned)
 
-- Editable PowerPoint assembly — removed from the active V1/V0.3 route. Historical experiments remain archived, but this route should not be offered by the plugin until it can clear a separate product-quality bar.
+- Editable PowerPoint assembly — removed from the active V1/V0.4 route. Historical experiments remain archived, but this route should not be offered by the plugin until it can clear a separate product-quality bar.
 - `style-director` skill — palette / typography / template management, beyond the in-prompt style guidance image-first decks already use.
 - `youtube-ingestor`, `audio-transcriber`, DOCX / PPTX / XLSX ingestion.
 - Local web UI / studio.
@@ -105,7 +105,7 @@ The Week 4 decision and Week 5 result reorder the V2 backlog from the original v
 
 - A new reader can produce the first deck-brief and storyboard within one hour using `install-and-use.md`. (Validated in W2; the actual time was under 15 minutes for a 5-slide topic.)
 - No conflicting terminology between SKILL.md and references (`production_mode` vs `budget_mode` are uniformly named after the W6 sweep).
-- Both `deckit-dev inspect` and `inspect-marketplace` pass with the v0.3.5 manifest.
+- Both `deckit-dev inspect` and `inspect-marketplace` pass with the v0.4.0 manifest.
 - The quality gate is callable, not aspirational: `deckit-dev review` produced findings on every test run during the roadmap.
 - The image-first artifact loop has been exercised through actual bitmap generation once: 8 PNG slides were generated from `prompts/*.md`, copied into the run folder, and reviewed in `dist/image-first-review.md`.
 

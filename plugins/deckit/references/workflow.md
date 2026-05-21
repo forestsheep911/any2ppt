@@ -126,7 +126,7 @@ Exceptions: answer directly when the user asks about Deckit's capabilities, inst
 
 ## Image-First Flow
 
-Deckit v0.3 has one active route: `image-first`.
+Deckit v0.4 has one active route: `image-first`.
 
 The default output sequence for explicit Deckit invocation is:
 
@@ -142,7 +142,7 @@ In this workflow, "image" means an actual image-generation step through the offi
 
 Do not offer alternate native-PowerPoint or mixed production routes as active choices. If the user asks for editable PowerPoint, explain that this plugin currently produces generated slide images, packaged into PPTX as non-editable full-slide images.
 
-Do not delegate an Deckit run to installed presentation/PPTX skills or plugins, even if they are available locally. This includes Codex `Presentations` and Anthropic `pptx`. Those skills are native-PPTX assemblers and conflict with the active v0.3 route.
+Do not delegate an Deckit run to installed presentation/PPTX skills or plugins, even if they are available locally. This includes Codex `Presentations` and Anthropic `pptx`. Those skills are native-PPTX assemblers and conflict with the active v0.4 route.
 
 ## Native PPTX Firewall
 

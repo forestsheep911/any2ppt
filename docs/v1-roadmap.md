@@ -1,6 +1,6 @@
 # Deckit V1 Roadmap
 
-> Archive note: this roadmap records historical V1 planning. As of v0.3, Deckit intentionally removes active `pptx-native` and `hybrid` routing. The live plugin route is image-first generation only.
+> Archive note: this roadmap records historical V1 planning. As of v0.4, Deckit intentionally removes active `pptx-native` and `hybrid` routing. The live plugin route is image-first generation only.
 
 ## Purpose
 

@@ -126,7 +126,7 @@ uv run deckit-dev new-run --source "https://example.com/<post>" --name <topic> -
 
 `--runs-dir` lets the run folder land in `<workdir>` instead of the default `<deckit-repo>\local-runs\`.
 
-`production_mode` and `budget_mode` are recorded in `run.json`. In v0.3, `production_mode` is always `image-first`; `--mode` is optional and accepts only `image-first`.
+`production_mode` and `budget_mode` are recorded in `run.json`. In v0.4, `production_mode` is always `image-first`; `--mode` is optional and accepts only `image-first`.
 
 You can also call the ingestor on its own (useful when you want to review the extracted Markdown before creating the run):
 
@@ -191,7 +191,7 @@ The walk-through used the topic *"Why a project should pin its Python version"* 
 
 1. **Cross-repo `inspect-marketplace` crashed with `relative_to` error.** When the plugin in `<workdir>/.agents/plugins/marketplace.json` lives in a different repository (absolute path), the dev tool tried to make the path relative to `<workdir>` and raised `ValueError`. **Fixed** in this iteration: `inspect-marketplace` now falls back to an absolute display path on `ValueError`.
 
-2. **`new-run` did not record production mode or budget.** The new W1 skill text requires `production_mode` to be tracked in `run.json`, but `new-run` had no way to write it. **Fixed**: `production_mode` and `budget_mode` are now in `run.json`. In v0.3, the only active production mode is `image-first`.
+2. **`new-run` did not record production mode or budget.** The new W1 skill text requires `production_mode` to be tracked in `run.json`, but `new-run` had no way to write it. **Fixed**: `production_mode` and `budget_mode` are now in `run.json`. In v0.4, the only active production mode is `image-first`.
 
 3. **`deckit-dev` requires `cd <deckit-repo>\tools` before every call.** The dev tool is not on `PATH`. For now the wrapper invocation in this document works, but a future improvement is to publish `deckit-dev` as a globally installable script (likely a `pipx install <deckit-repo>/tools` recipe) so a fresh contributor does not need to navigate into the repo.
 
@@ -208,7 +208,7 @@ The artifacts produced during the walk-through stay outside the repo (`local-run
 
 ## Known Limitations
 
-- Native PPTX assembly is not an active v0.3 route. Generated PNGs may be packaged into PPTX as non-editable full-slide images, but image generation must happen first.
-- Hybrid mode is not an active v0.3 route.
+- Native PPTX assembly is not an active v0.4 route. Generated PNGs may be packaged into PPTX as non-editable full-slide images, but image generation must happen first.
+- Hybrid mode is not an active v0.4 route.
 - `document-ingestor` (PDF + URL) handles plain documents only — no OCR, no JavaScript-rendered pages, no authenticated URLs. See `plugins/deckit/skills/document-ingestor/SKILL.md` for the full limitations list.
 - `youtube-ingestor`, `audio-transcriber`, and DOCX/PPTX/XLSX ingestion are V2 work, not V1.
