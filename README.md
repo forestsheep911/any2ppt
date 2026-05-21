@@ -2,7 +2,7 @@
 
 Deckit is a Codex plugin for producing image-first presentation decks end to end.
 
-Current release: **v0.4.1**.
+Current release: **v0.4.2**.
 
 ## What Deckit Does
 
@@ -48,7 +48,7 @@ The marketplace entry should point to this repository as a git subdirectory sour
     "source": "git-subdir",
     "url": "forestsheep911/deckit",
     "path": "plugins/deckit",
-    "ref": "v0.4.1"
+    "ref": "v0.4.2"
   }
 }
 ```
@@ -56,7 +56,7 @@ The marketplace entry should point to this repository as a git subdirectory sour
 Useful verification commands:
 
 ```powershell
-git ls-remote --tags https://github.com/forestsheep911/deckit.git refs/tags/v0.4.1
+git ls-remote --tags https://github.com/forestsheep911/deckit.git refs/tags/v0.4.2
 ```
 
 ```powershell
@@ -111,6 +111,6 @@ See `AGENTS.md` for the detailed release and Windows marketplace-upgrade trouble
 
 - `docs/install-and-use.md` — local install and workflow notes.
 - `docs/development-layout.md` — repository layout and dev-tool notes.
-- `docs/v1-status.md` — current V1 status, updated for v0.4.1.
+- `docs/v1-status.md` — current V1 status, updated for v0.4.2.
 - `docs/production-mode-insights.md` — archived production-mode research.
 - `docs/pptx-native-experiment.md` — archived native-PPTX experiment notes.
