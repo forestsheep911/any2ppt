@@ -71,7 +71,7 @@ Skip the recommendation/preflight entirely only when the user explicitly says to
 
 Key fields include quality/budget, approximate page count, audience or goal, rough structure, and final delivery target. Map explicit user wording into settings instead of asking again: "高质量" → `premium`, "6 页" → `target_slide_count: 6`, "按背景/挑战/方案/案例/结论" → accepted rough outline, and "输出 PDF" → `pdf`.
 
-Generated slide PNGs are always retained under `assets/generated-slides/`, and `dist/preview.png` is a standard automatic preview artifact. Do not present raw PNGs, a single PNG, or a stitched long image as final delivery choices in preflight. If the user asks for a PNG/preview/long image, keep the generated slide PNGs and the standard vertical preview artifact, but still ask for or infer only `pptx` or `pdf` as the final packaged deliverable unless the user explicitly requests a partial image-only run.
+Generated slide PNGs are always retained under `assets/generated-slides/`, and Deckit produces standard automatic preview artifact(s): `dist/preview.png` up to 32 slides, or numbered `dist/preview-XX.png` files above 32 slides. Do not present raw PNGs, a single PNG, or a stitched long image as final delivery choices in preflight. If the user asks for a PNG/preview/long image, keep the generated slide PNGs and the standard vertical preview artifact, but still ask for or infer only `pptx` or `pdf` as the final packaged deliverable unless the user explicitly requests a partial image-only run.
 
 For the page-count preflight item, provide 3-4 choices with the recommended option first, plus a custom option. Examples:
 
@@ -136,7 +136,7 @@ The default output sequence for explicit Deckit invocation is:
 - `prompts/<slide-id>.md`
 - `assets/generated-slides/<slide-id>.png` from `$imagegen`
 - the requested final delivery target; default is `dist/<deck-name>.pptx` as a non-editable container around generated PNGs
-- `dist/preview.png` as the standard medium-size vertical preview image
+- `dist/preview.png` for decks up to 32 slides, or numbered `dist/preview-XX.png` files for longer decks, as the standard medium-size vertical preview artifact(s)
 
 In this workflow, "image" means an actual image-generation step through the official `$imagegen` skill. A PowerPoint file with full-slide PNGs is only a delivery container after the PNGs are generated; it is not the production route. Do not interpret image-first as "draw slides with PIL/canvas/HTML/SVG and insert them into PPTX."
 
@@ -203,10 +203,12 @@ Deckit should also produce a standard preview image after generated slide PNGs e
 
 Preview requirements:
 
-- Output path: `dist/preview.png`.
+- Output path: `dist/preview.png` for decks up to 32 slides; for 33+ slides, generate numbered files only, `dist/preview-01.png`, `dist/preview-02.png`, etc.
 - Use generated slide PNGs in storyboard order.
-- Stack pages vertically in a single top-to-bottom column for mobile-friendly scanning.
-- Resize to a medium preview width so the image is not a full-resolution long-image deliverable; it only needs to show the overall deck flow clearly.
+- Each preview file contains at most 32 slides.
+- Determine columns per preview chunk: 1-3 slides => 1 column; 4-8 slides => 2 columns; 9-15 slides => 3 columns; 16-32 slides => 4 columns.
+- Fill slides left-to-right, top-to-bottom. If the final row is incomplete, leave the missing cells empty; do not center, rebalance, or add placeholders.
+- Keep a fixed medium preview width and let height grow by row count; the preview is not a full-resolution long-image deliverable and only needs to show the overall deck flow clearly.
 
 Do not use PDF or preview packaging to bypass `$imagegen`. The required source remains `assets/generated-slides/<slide-id>.png`.
 
@@ -222,7 +224,7 @@ When a run fails, looks suspicious, or the user asks why a route was chosen, pre
 4. `slide-storyboarder` creates `work/storyboard.md`.
 5. `visual-director` creates model-ready image prompts in `prompts/*.md`.
 6. If Deckit was explicitly invoked and `$imagegen` is available, invoke `$imagegen` once per slide prompt. In built-in mode, copy or move the generated images from `$CODEX_HOME/generated_images/...` into `assets/generated-slides/`. If `$imagegen` is truly unavailable, stop at the prompt pack and report that generated images are pending.
-7. Package the generated PNGs according to `requested_output.delivery_target` after all expected PNGs exist. Use the repository packaging helper only when it is available; otherwise use a local image-container packaging path that keeps the same one-image-per-page invariant. Ensure `dist/preview.png` is produced as the standard preview artifact. Do not wait for a separate "continue" instruction during an explicit Deckit run.
+7. Package the generated PNGs according to `requested_output.delivery_target` after all expected PNGs exist. Use the repository packaging helper only when it is available; otherwise use a local image-container packaging path that keeps the same one-image-per-page invariant. Ensure the standard preview artifact(s) are produced: `dist/preview.png` up to 32 slides, or numbered `dist/preview-XX.png` files above 32 slides. Do not wait for a separate "continue" instruction during an explicit Deckit run.
 8. `deck-producer` performs a final quality check (manual checklist or available development review helper) and summarizes deliverables.
 
 ## Source Inputs (V1)
@@ -274,7 +276,7 @@ Then produce artifacts inside that run folder:
 - If the user asks for an editable PPTX, state the current limitation and continue only if they accept image-first, non-editable full-slide images.
 - If Deckit was explicitly invoked, or if the user asks for generated images packaged as PPTX, generate PNGs first, then place those PNGs into a PPTX as a non-editable container.
 - If the user asks for PDF output, still generate PNGs first, then package the PNGs into an image-only PDF.
-- If the user asks for a PNG preview or long-image style overview, do not treat it as the final delivery target; produce the standard `dist/preview.png` from the generated slide PNGs and choose/ask for PPTX or PDF as the final package.
+- If the user asks for a PNG preview or long-image style overview, do not treat it as the final delivery target; produce the standard preview artifact(s) from the generated slide PNGs (`dist/preview.png` up to 32 slides; numbered `dist/preview-XX.png` files above 32 slides) and choose/ask for PPTX or PDF as the final package.
 - If another installed presentation/PPTX skill offers to help, do not route to it. Keep the run inside Deckit's own skill chain and `$imagegen`.
 
 ## Artifact Paths
@@ -289,6 +291,6 @@ Always:
 - `prompts/<slide-id>.md`
 - `assets/generated-slides/<slide-id>.png` when actual image generation is performed
 - `dist/<deck-name>.pptx` or `.pdf` when the generated PNGs are packaged for the requested final delivery target
-- `dist/preview.png` as the standard medium-size vertical preview
+- `dist/preview.png` for decks up to 32 slides, or numbered `dist/preview-XX.png` files for longer decks, as the standard medium-size vertical preview artifact(s)
 
 Do not overwrite user-provided source files. If re-running, create a new run folder or ask before replacing artifacts.

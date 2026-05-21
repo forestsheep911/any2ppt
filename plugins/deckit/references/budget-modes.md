@@ -15,7 +15,7 @@ Default scope:
 - Visual direction and per-slide image prompts.
 - Generated slide images through the official `$imagegen` skill.
 - Requested final delivery packaging after generated PNGs exist; default is non-editable PPTX image-container packaging.
-- Standard `dist/preview.png` generation from slide PNGs.
+- Standard preview generation from slide PNGs (`dist/preview.png` up to 32 slides; numbered `dist/preview-XX.png` files above 32 slides).
 - Single-pass review; no multi-pass critique.
 
 Target slide count: **4-6**.
@@ -32,7 +32,7 @@ Default scope:
 - Per-slide image prompts.
 - Generated slide images through the official `$imagegen` skill.
 - Requested final delivery packaging after generated PNGs exist; default is non-editable PPTX image-container packaging.
-- Standard `dist/preview.png` generation from slide PNGs.
+- Standard preview generation from slide PNGs (`dist/preview.png` up to 32 slides; numbered `dist/preview-XX.png` files above 32 slides).
 - Lightweight manual or automated quality check archived to `dist/review.md`.
 
 Target slide count: **7-10**.
@@ -48,7 +48,7 @@ Default scope:
 - Visual direction.
 - Generated images through `$imagegen`. "Generated images" means images produced by the official `$imagegen` skill, not locally rendered screenshots or PIL/canvas output.
 - Requested final delivery packaging after generated PNGs exist; default is non-editable PPTX image-container packaging.
-- Standard `dist/preview.png` generation from slide PNGs.
+- Standard preview generation from slide PNGs (`dist/preview.png` up to 32 slides; numbered `dist/preview-XX.png` files above 32 slides).
 - Render or screenshot review.
 - Iteration on weak slides.
 

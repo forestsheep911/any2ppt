@@ -2,7 +2,7 @@
 
 Deckit is a Codex plugin for producing image-first presentation decks end to end.
 
-Current release: **v0.4.0**.
+Current release: **v0.4.1**.
 
 ## What Deckit Does
 
@@ -14,7 +14,7 @@ Deckit turns a topic, note, Markdown document, PDF, or URL into a presentation w
 4. Write image-generation prompts for each full-slide visual.
 5. Generate actual slide images through the official image generation capability when available.
 6. Package generated slide PNGs into the requested final delivery target.
-7. Produce a standard preview image at `dist/preview.png`.
+7. Produce standard preview artifact(s): `dist/preview.png` for decks up to 32 slides, or numbered `dist/preview-XX.png` files for longer decks.
 8. Review and audit the output before delivery.
 
 ## Current Production Route
@@ -48,7 +48,7 @@ The marketplace entry should point to this repository as a git subdirectory sour
     "source": "git-subdir",
     "url": "forestsheep911/deckit",
     "path": "plugins/deckit",
-    "ref": "v0.4.0"
+    "ref": "v0.4.1"
   }
 }
 ```
@@ -56,7 +56,7 @@ The marketplace entry should point to this repository as a git subdirectory sour
 Useful verification commands:
 
 ```powershell
-git ls-remote --tags https://github.com/forestsheep911/deckit.git refs/tags/v0.4.0
+git ls-remote --tags https://github.com/forestsheep911/deckit.git refs/tags/v0.4.1
 ```
 
 ```powershell
@@ -100,7 +100,7 @@ When publishing a new Deckit version:
 
 1. Update `plugins/deckit/.codex-plugin/plugin.json`.
 2. Commit and push the Deckit repository changes.
-3. Create and push a matching tag, for example `v0.4.0`.
+3. Create and push a matching tag, for example `v0.4.1`.
 4. Update `forestsheep911/codex-plugin-marketplace-2water` so `.agents/plugins/marketplace.json` points Deckit's `ref` to the new tag.
 5. Commit and push the marketplace change.
 6. Verify that the remote tag exists and the raw marketplace JSON points at the same tag.
@@ -111,6 +111,6 @@ See `AGENTS.md` for the detailed release and Windows marketplace-upgrade trouble
 
 - `docs/install-and-use.md` — local install and workflow notes.
 - `docs/development-layout.md` — repository layout and dev-tool notes.
-- `docs/v1-status.md` — current V1 status, updated for v0.4.0.
+- `docs/v1-status.md` — current V1 status, updated for v0.4.1.
 - `docs/production-mode-insights.md` — archived production-mode research.
 - `docs/pptx-native-experiment.md` — archived native-PPTX experiment notes.

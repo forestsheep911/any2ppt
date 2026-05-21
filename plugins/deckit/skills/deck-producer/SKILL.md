@@ -250,10 +250,12 @@ A medium-size vertical preview image is a standard artifact and should be produc
 
 Preview requirements:
 
-- Output path: `dist/preview.png` by default.
+- Output path: `dist/preview.png` by default for decks up to 32 slides; for 33+ slides, generate numbered files only, such as `dist/preview-01.png`, `dist/preview-02.png`, etc.
 - Use the generated slide PNGs in storyboard order.
-- Stack slides vertically in a single column, top to bottom, because this is easier to scan on mobile.
-- Keep the preview medium-size rather than full-resolution long-image delivery; it only needs to show the overall visual flow clearly.
+- Each preview file contains at most 32 slides.
+- Determine columns per preview chunk: 1-3 slides => 1 column; 4-8 slides => 2 columns; 9-15 slides => 3 columns; 16-32 slides => 4 columns.
+- Fill slides left-to-right, top-to-bottom. If the final row is incomplete, leave the missing cells empty; do not center, rebalance, or add placeholders.
+- Keep the preview medium-size and fixed-width rather than full-resolution long-image delivery; height grows by row count and only needs to show the overall visual flow clearly.
 
 If the user requests multiple final delivery targets, produce the primary requested target first, then secondary PPTX/PDF packages only after the same generated PNGs exist. The preview should still exist either way.
 
@@ -266,7 +268,7 @@ If the user requests multiple final delivery targets, produce the primary reques
 5. Select the minimum specialist workflow needed.
 6. Keep intermediate artifacts in predictable paths.
 7. Invoke the official `$imagegen` skill to generate full-slide images from the prompt pack unless the user explicitly asked for a partial/text-only artifact or `$imagegen` is truly unavailable. In built-in mode, copy or move generated images from `$CODEX_HOME/generated_images/...` into `assets/generated-slides/`.
-8. Package generated slide images according to the final delivery target, and ensure `dist/preview.png` is produced as the standard preview artifact. A missing repository development helper is not a packaging blocker; use a local image-container path that preserves the same invariants.
+8. Package generated slide images according to the final delivery target, and ensure the standard preview artifact(s) are produced: `dist/preview.png` up to 32 slides, or numbered `dist/preview-XX.png` files above 32 slides. A missing repository development helper is not a packaging blocker; use a local image-container path that preserves the same invariants.
 9. Apply quality gates before calling the work done.
 
 Use `../../references/workflow.md` for the production flow and `../../references/budget-modes.md` for budget decisions.
@@ -340,7 +342,7 @@ Image-first mode:
 - `prompts/<slide-id>.md`
 - `assets/generated-slides/<slide-id>.png` after an actual image-generation step has run
 - `dist/<deck-name>.pptx` or `.pdf` as a package around generated images, not as the primary image-generation method
-- `dist/preview.png` as the standard medium-size vertical preview image
+- `dist/preview.png` for decks up to 32 slides, or numbered `dist/preview-XX.png` files for longer decks, as the standard medium-size vertical preview artifact(s)
 
 Do not create native PowerPoint layout specs as a substitute for image prompts. Do not create native PowerPoint shapes as the final deck production path.
 

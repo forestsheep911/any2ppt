@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import shutil
 import zipfile
@@ -167,7 +168,7 @@ def new_run(
         "generated_slides": "assets/generated-slides/<slide-id>.png",
     }
     artifacts["dist"] = "dist/"
-    artifacts["preview"] = "dist/preview.png"
+    artifacts["preview"] = "dist/preview.png (<=32 slides) or dist/preview-XX.png (>32 slides)"
     artifacts["review"] = "dist/review.md"
 
     children: list[str] = ["source", "work", "prompts", "assets/generated-slides", "dist"]
@@ -690,13 +691,20 @@ def _find_pptx_deliverables(run_dir: Path) -> list[Path]:
     return sorted(set(candidates))
 
 
+def _expected_preview_paths(run_dir: Path, slide_count: int) -> list[Path]:
+    chunk_count = math.ceil(slide_count / MAX_SLIDES_PER_PREVIEW)
+    base_path = run_dir / "dist" / "preview.png"
+    if chunk_count == 1:
+        return [base_path]
+    return [base_path.with_name(f"preview-{index:02d}.png") for index in range(1, chunk_count + 1)]
+
+
 def _scan_image_first_artifacts(run_dir: Path, storyboard_ids: list[str]) -> list[tuple[str, str, str]]:
     findings: list[tuple[str, str, str]] = []
     generated_dir = run_dir / "assets" / "generated-slides"
     generated_pngs = sorted(generated_dir.glob("*.png")) if generated_dir.is_dir() else []
     generated_ids = {p.stem for p in generated_pngs}
     dist_pptx = _find_pptx_deliverables(run_dir)
-    preview_path = run_dir / "dist" / "preview.png"
 
     if dist_pptx and not generated_pngs:
         pptx_names = ", ".join(p.name for p in dist_pptx)
@@ -740,14 +748,18 @@ def _scan_image_first_artifacts(run_dir: Path, storyboard_ids: list[str]) -> lis
             )
         )
 
-    if storyboard_ids and set(storyboard_ids).issubset(generated_ids) and not preview_path.is_file():
-        findings.append(
-            (
-                "warn",
-                "IMG-FIRST-PREVIEW-MISSING",
-                "generated slide PNGs are complete but the standard preview is missing at dist/preview.png",
+    if storyboard_ids and set(storyboard_ids).issubset(generated_ids):
+        expected_previews = _expected_preview_paths(run_dir, len(storyboard_ids))
+        missing_previews = [path for path in expected_previews if not path.is_file()]
+        if missing_previews:
+            missing = ", ".join(str(path.relative_to(run_dir)) for path in missing_previews)
+            findings.append(
+                (
+                    "warn",
+                    "IMG-FIRST-PREVIEW-MISSING",
+                    f"generated slide PNGs are complete but standard preview file(s) are missing at {missing}",
+                )
             )
-        )
 
     findings.extend(_scan_native_pptx_scripts(run_dir))
     findings.extend(_scan_native_pptx_language(run_dir))
@@ -828,12 +840,12 @@ def _package_images(run_dir: Path, out_path: Path | None) -> int:
         if not slide.has_notes_slide or not slide.notes_slide.notes_text_frame.text.strip():
             raise ValueError(f"packaged PPTX slide {idx} is missing speaker notes")
 
-    preview_path = _package_preview(run_dir, None)
+    preview_paths = _package_preview(run_dir, None)
 
     print(f"wrote: {out_path}")
     print(f"slides packaged: {len(slide_ids)}")
     print("mode: image-first PNG container; no editable native PowerPoint slide content; speaker notes included")
-    print(f"preview: {preview_path}")
+    print(f"preview: {_format_preview_paths(preview_paths)}")
     return 0
 
 
@@ -1002,27 +1014,102 @@ def _package_pdf(run_dir: Path, out_path: Path | None) -> int:
 
     _write_lossless_image_pdf(image_paths, out_path)
 
-    preview_path = _package_preview(run_dir, None)
+    preview_paths = _package_preview(run_dir, None)
 
     print(f"wrote: {out_path}")
     print(f"pages packaged: {len(slide_ids)}")
     print("mode: image-first PNG PDF; lossless Flate image embedding; no JPEG recompression")
-    print(f"preview: {preview_path}")
+    print(f"preview: {_format_preview_paths(preview_paths)}")
     return 0
 
 
-def _package_preview(run_dir: Path, out_path: Path | None, width: int = 900, gap: int = 24, background: str = "white") -> Path:
-    """Create the standard medium-size vertical preview PNG from generated slide images."""
-    run_dir = run_dir.resolve()
-    slide_ids, image_paths = _require_generated_slide_images(run_dir)
-    if out_path is None:
-        out_path = run_dir / "dist" / "preview.png"
-    else:
-        out_path = _resolve_dist_output(run_dir, out_path, ".png")
-    out_path = out_path.resolve()
+MAX_SLIDES_PER_PREVIEW = 32
+
+
+def _preview_column_count(slide_count: int) -> int:
+    """Return the fixed Deckit preview column count for one preview chunk."""
+    if slide_count <= 0:
+        raise ValueError(f"slide_count must be positive, got {slide_count}")
+    if slide_count <= 3:
+        return 1
+    if slide_count <= 8:
+        return 2
+    if slide_count <= 15:
+        return 3
+    return 4
+
+
+def _chunk_preview_images(image_paths: list[Path], max_slides_per_preview: int = MAX_SLIDES_PER_PREVIEW) -> list[list[Path]]:
+    if max_slides_per_preview <= 0:
+        raise ValueError(f"max_slides_per_preview must be positive, got {max_slides_per_preview}")
+    return [image_paths[index : index + max_slides_per_preview] for index in range(0, len(image_paths), max_slides_per_preview)]
+
+
+def _preview_output_paths(run_dir: Path, out_path: Path | None, chunk_count: int) -> list[Path]:
+    """Return output path(s) using scheme A: one plain file, or numbered files only."""
+    if chunk_count <= 0:
+        raise ValueError(f"chunk_count must be positive, got {chunk_count}")
+
     dist_dir = run_dir / "dist"
     dist_dir.mkdir(parents=True, exist_ok=True)
-    _ensure_inside(dist_dir, out_path)
+
+    if out_path is None:
+        base_path = dist_dir / "preview.png"
+    else:
+        base_path = out_path if out_path.is_absolute() else run_dir / out_path
+    base_path = base_path.resolve()
+    _ensure_inside(dist_dir, base_path)
+
+    if chunk_count == 1:
+        return [base_path]
+
+    suffix = base_path.suffix or ".png"
+    stem = base_path.stem
+    return [base_path.with_name(f"{stem}-{index:02d}{suffix}") for index in range(1, chunk_count + 1)]
+
+
+def _render_preview_chunk(image_paths: list[Path], out_path: Path, width: int, gap: int, fill: object, Image: object) -> None:
+    slide_count = len(image_paths)
+    cols = _preview_column_count(slide_count)
+    rows = math.ceil(slide_count / cols)
+    tile_width = (width - gap * (cols - 1)) // cols
+    if tile_width <= 0:
+        raise ValueError(f"width {width} is too small for {cols} columns with gap {gap}")
+
+    preview_slides = []
+    for image_path in image_paths:
+        with Image.open(image_path) as image:
+            slide = image.convert("RGB")
+            height = round(slide.height * (tile_width / slide.width))
+            slide = slide.resize((tile_width, height), Image.Resampling.LANCZOS)
+            preview_slides.append(slide.copy())
+
+    tile_height = max(image.height for image in preview_slides)
+    total_height = rows * tile_height + gap * (rows - 1)
+    canvas = Image.new("RGB", (width, total_height), fill)
+
+    for index, image in enumerate(preview_slides):
+        row = index // cols
+        col = index % cols
+        x = col * (tile_width + gap)
+        y = row * (tile_height + gap)
+        canvas.paste(image, (x, y))
+
+    canvas.save(out_path)
+
+
+def _package_preview(run_dir: Path, out_path: Path | None, width: int = 900, gap: int = 24, background: str = "white") -> list[Path]:
+    """Create Deckit vertical preview PNG(s) from generated slide images.
+
+    Layout rules:
+    - one preview image contains at most 32 slides;
+    - 1-32 total slides: write the plain output path (default dist/preview.png);
+    - 33+ total slides: write numbered files only (default dist/preview-01.png, ...);
+    - per chunk columns: 1-3 => 1, 4-8 => 2, 9-15 => 3, 16-32 => 4;
+    - slides fill left-to-right, top-to-bottom; incomplete final rows are not centered.
+    """
+    run_dir = run_dir.resolve()
+    _, image_paths = _require_generated_slide_images(run_dir)
     if width <= 0:
         raise ValueError(f"width must be positive, got {width}")
     if gap < 0:
@@ -1038,34 +1125,23 @@ def _package_preview(run_dir: Path, out_path: Path | None, width: int = 900, gap
     except ValueError as exc:
         raise ValueError(f"background must be a Pillow-compatible color, got {background!r}") from exc
 
-    preview_slides = []
-    for image_path in image_paths:
-        with Image.open(image_path) as image:
-            slide = image.convert("RGB")
-            if slide.width > width:
-                height = round(slide.height * (width / slide.width))
-                slide = slide.resize((width, height), Image.Resampling.LANCZOS)
-            preview_slides.append(slide.copy())
+    chunks = _chunk_preview_images(image_paths)
+    output_paths = _preview_output_paths(run_dir, out_path, len(chunks))
+    for chunk, preview_path in zip(chunks, output_paths, strict=True):
+        _render_preview_chunk(chunk, preview_path, width, gap, fill, Image)
+    return output_paths
 
-    max_width = max(image.width for image in preview_slides)
-    total_height = sum(image.height for image in preview_slides) + gap * (len(preview_slides) - 1)
-    canvas = Image.new("RGB", (max_width, total_height), fill)
 
-    y = 0
-    for image in preview_slides:
-        x = (max_width - image.width) // 2
-        canvas.paste(image, (x, y))
-        y += image.height + gap
-
-    canvas.save(out_path)
-    return out_path
+def _format_preview_paths(preview_paths: list[Path]) -> str:
+    return ", ".join(str(path) for path in preview_paths)
 
 
 def _package_preview_command(run_dir: Path, out_path: Path | None, width: int, gap: int, background: str) -> int:
-    """CLI wrapper for the standard vertical preview PNG."""
-    preview_path = _package_preview(run_dir, out_path, width=width, gap=gap, background=background)
-    print(f"wrote: {preview_path}")
-    print(f"preview: {preview_path}")
+    """CLI wrapper for the standard vertical preview PNG(s)."""
+    preview_paths = _package_preview(run_dir, out_path, width=width, gap=gap, background=background)
+    for preview_path in preview_paths:
+        print(f"wrote: {preview_path}")
+    print(f"preview: {_format_preview_paths(preview_paths)}")
     print("mode: standard medium-size vertical preview generated from slide PNGs")
     return 0
 
@@ -1219,13 +1295,13 @@ def main() -> int:
 
     preview_parser = subparsers.add_parser(
         "package-preview",
-        help="Create the standard medium-size vertical preview PNG from assets/generated-slides/*.png",
+        help="Create standard medium-size vertical preview PNG(s) from assets/generated-slides/*.png",
     )
     preview_parser.add_argument("--run", type=Path, required=True, help="Path to the run directory to package.")
     preview_parser.add_argument(
         "--out",
         type=Path,
-        help="Output PNG path. Relative paths are resolved inside the run directory; default: dist/preview.png.",
+        help="Output PNG base path. Relative paths are resolved inside the run directory; default: dist/preview.png for <=32 slides, or numbered dist/preview-XX.png files for >32 slides.",
     )
     preview_parser.add_argument("--width", type=int, default=900, help="Maximum preview width in pixels.")
     preview_parser.add_argument("--gap", type=int, default=24, help="Vertical gap in pixels between slides.")
